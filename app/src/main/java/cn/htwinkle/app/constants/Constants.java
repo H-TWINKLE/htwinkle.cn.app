@@ -1,0 +1,14 @@
+package cn.htwinkle.app.constants;
+
+import cn.htwinkle.app.BuildConfig;
+
+public interface Constants {
+
+    String URL = "url";
+    String DATA = "data";
+    String KV_NAME = "name";
+
+    long CACHE_MAX_TIME = 365L * 24 * 60 * 60 * 1000;
+
+    String APP_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+}

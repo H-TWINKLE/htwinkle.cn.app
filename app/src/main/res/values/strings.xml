@@ -1,5 +1,10 @@
 <resources>
-    <string name="app_name">CnHtwinkleApp</string>
+    <string name="app_name">WeLife</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <!--base-->
+    <string name="progress">正在加载</string>
+    <string name="et_base_hint">请填写内容 ···</string>
+    <string name="skip">跳过</string>
 </resources>

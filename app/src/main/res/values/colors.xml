@@ -12,4 +12,13 @@
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
+
+    <!--base-->
+    <color name="div_line">#96d1d0d0</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="shapes_no">#d2d2d2</color>
+    <color name="shapes_yes">#959797</color>
 </resources>
