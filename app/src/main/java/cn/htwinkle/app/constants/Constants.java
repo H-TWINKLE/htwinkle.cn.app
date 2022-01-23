@@ -4,6 +4,7 @@ import cn.htwinkle.app.BuildConfig;
 
 public interface Constants {
 
+    String STATUS_OK = "ok";
     String URL = "url";
     String DATA = "data";
     String KV_NAME = "name";
@@ -11,4 +12,9 @@ public interface Constants {
     long CACHE_MAX_TIME = 365L * 24 * 60 * 60 * 1000;
 
     String APP_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+
+    /**
+     * SharedPreferences KEY
+     */
+    String SHARE_PREFERENCES_KEY = "HtwinkleCnAppData";
 }
