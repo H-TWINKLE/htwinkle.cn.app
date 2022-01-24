@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/base_white_shapes"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:cardCornerRadius="5dp"
+        app:cardElevation="0dp">
+
+        <com.loopj.android.image.SmartImageView
+            android:id="@+id/item_app_info_img_siv"
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            tools:src="@drawable/base_empty" />
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:orientation="vertical"
+        android:padding="@dimen/dp_10">
+
+        <TextView
+            android:id="@+id/item_app_info_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="群发短信" />
+
+        <TextView
+            android:id="@+id/item_app_info_description_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:paddingTop="5dp"
+            android:textColor="@color/black_description"
+            android:textSize="16sp"
+            tools:text="群发短信群发短信群发短信群发短信群发短信群发短信群发短信群发短信群发短信群发短信" />
+    </LinearLayout>
+
+</LinearLayout>

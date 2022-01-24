@@ -3,8 +3,6 @@
     android:id="@+id/base_ll_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="@dimen/dp_50"
-    android:background="@drawable/base_activity_dialog_background"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 

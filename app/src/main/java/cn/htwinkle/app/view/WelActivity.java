@@ -139,7 +139,7 @@ public class WelActivity extends BaseActivity implements BaseHttpListener.HttpLi
      * 前往主应用
      */
     private void toActivity() {
-
+        startActivity(MainActivity.class);
     }
 
     @SuppressLint("WrongConstant")

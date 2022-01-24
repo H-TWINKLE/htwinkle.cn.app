@@ -13,6 +13,8 @@ public interface Constants {
 
     String APP_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
+    String APP_LIST_PACKAGE = APP_PACKAGE_NAME + ".view.app";
+
     /**
      * SharedPreferences KEY
      */
