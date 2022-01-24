@@ -34,7 +34,7 @@ import cn.htwinkle.app.view.base.BaseRefreshActivity;
         description = "自定义称谓的群发信息",
         imgResourcesId = R.drawable.welcome_default_pic,
         permissions = {Permission.SEND_SMS, Permission.RECEIVE_SMS, Permission.READ_SMS,
-                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS}
+                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS}
 )
 @ContentView(R.layout.base_recycler_with_toolbar)
 public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAdapter> {

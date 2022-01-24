@@ -2,6 +2,40 @@ plugins {
     id 'com.android.application'
 }
 
+ext {
+    verCode = 1
+    verName = "1.0"
+}
+
+def addVerCode() {
+    //如果version.properties文件可读则执行操作
+    def versionPropsFile = file('../version.properties')
+    if (versionPropsFile.canRead()) {
+        //载入version.properties
+        println("find file: VERSION_CODE")
+        Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        //从version.properties根据关键字"VERSION_CODE"取Integer
+        verCode = versionProps['VERSION_CODE'].toInteger()
+        verName = versionProps['VERSION_NAME'].toString()
+        println("find verCode: " + verCode + " find verName: " + verName)
+        //判断build模式,如果是特定模式
+        // 则自增版本号,并且写回version.properties文件中
+        def runTasks = gradle.startParameter.taskNames
+        //根据实际情况进行处理
+        if ('assemble' in runTasks) {
+            println("auto add: VERSION_CODE")
+            //版本号自增并写入版本控制文件
+            versionProps['VERSION_CODE'] = (++verCode).toString()
+            verCode = versionProps['VERSION_CODE'].toInteger()
+            versionProps.store(versionPropsFile.newWriter(), null)
+        }
+    } else {
+        throw new GradleException("Could not find version.properties!")
+    }
+    //版本号及版本名自增逻辑结束
+}
+
 android {
     compileSdk 31
 
@@ -9,16 +43,31 @@ android {
         applicationId "cn.htwinkle.app"
         minSdk 24
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode verCode
+        versionName verName + "." + verCode
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            keyAlias rootProject.ext.KEY_ALIAS
+            keyPassword rootProject.ext.KEY_PASSWORD
+            storeFile file('E:/MyMajor/myandroid/Sky.jks')
+            storePassword rootProject.ext.KEYSTORE_PASSWORD
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "WeLife_V${defaultConfig.versionName}_${variant.buildType.name}.apk"
+            }
         }
     }
     compileOptions {

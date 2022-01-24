@@ -16,18 +16,21 @@ import cn.htwinkle.app.entity.SmsPerson;
 import cn.htwinkle.app.kit.StrKit;
 
 public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder> {
+
+    private static final String TAG = "SmsPersonAdapter";
+
     public SmsPersonAdapter(int layoutResId) {
         super(layoutResId);
     }
 
     @Override
-    protected void convert(@NonNull BaseViewHolder holder, SmsPerson smsPerson) {
+    protected void convert(@NonNull final BaseViewHolder holder, final SmsPerson smsPerson) {
 
         holder.setText(R.id.item_sms_person_index_tv, getItemPosition(smsPerson) + 1 + "");
+        holder.setText(R.id.item_sms_person_tel_tv, StrKit.safetyText(smsPerson.getTelPhone()));
 
         CheckBox checkBox = holder.getView(R.id.item_sms_person_cb);
         checkBox.setOnCheckedChangeListener(null);
-
         checkBox.setChecked(smsPerson.isChecked());
         checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             smsPerson.setChecked(isChecked);
@@ -53,12 +56,10 @@ public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder
 
             @Override
             public void afterTextChanged(Editable s) {
-                smsPerson.setName(s.toString());
+                if (nameEt.isFocused()) {
+                    smsPerson.setName(s.toString());
+                }
             }
         });
-
-
-        EditText telEt = holder.getView(R.id.item_sms_person_tel_et);
-        telEt.setText(StrKit.safetyText(smsPerson.getTelPhone()));
     }
 }
