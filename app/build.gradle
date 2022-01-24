@@ -37,6 +37,8 @@ def addVerCode() {
 }
 
 android {
+    addVerCode()
+
     compileSdk 31
 
     defaultConfig {
