@@ -14,14 +14,16 @@ import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.alibaba.fastjson.JSONObject;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
 import com.loopj.android.image.SmartImageView;
-import com.yanzhenjie.permission.AndPermission;
-import com.yanzhenjie.permission.runtime.Permission;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 
+import java.util.List;
 import java.util.Locale;
 
 import cn.htwinkle.app.R;
@@ -71,12 +73,13 @@ public class WelActivity extends BaseActivity implements BaseHttpListener.HttpLi
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        handler.postDelayed(() -> wel_cl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION), 500);
+        handler.postDelayed(() -> wel_cl.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LOW_PROFILE
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION), 500);
     }
 
 
@@ -144,12 +147,18 @@ public class WelActivity extends BaseActivity implements BaseHttpListener.HttpLi
 
     @SuppressLint("WrongConstant")
     private void loadStoragesPermission() {
-        AndPermission.with(this)
-                .runtime()
+        XXPermissions.with(this)
                 .permission(Permission.Group.STORAGE)
-                .onDenied(permissions -> {
-                    setToastString("请授予文件访问权限");
-                })
-                .start();
+                .request(new OnPermissionCallback() {
+                    @Override
+                    public void onGranted(List<String> permissions, boolean all) {
+
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions, boolean never) {
+                        setToastString("请授予文件访问权限");
+                    }
+                });
     }
 }

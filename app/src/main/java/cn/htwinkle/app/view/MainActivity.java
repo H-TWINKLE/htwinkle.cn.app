@@ -3,13 +3,20 @@ package cn.htwinkle.app.view;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import com.yanzhenjie.permission.AndPermission;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.XXPermissions;
 
 import org.xutils.view.annotation.ContentView;
 
@@ -27,6 +34,21 @@ import cn.htwinkle.app.view.base.BaseRefreshActivity;
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
 
+    private final Handler handler = new Handler();
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        handler.postDelayed(() -> {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }, 100);
+    }
+
     @Override
     public void setDefaultView() {
         getBase_swipe_refresh_layout().setColorSchemeColors(Color.rgb(47, 223, 189));
@@ -42,10 +64,7 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
     @Override
     public void initData() {
         adapter = new AppInfoAdapter(R.layout.item_app_info);
-        adapter.setOnItemClickListener((adapter, view, position) ->
-        {
-            preStartApp(position);
-        });
+        adapter.setOnItemClickListener((adapter, view, position) -> preStartApp(position));
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
         getData();
     }
@@ -110,12 +129,19 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
     private void preStartApp(int position) {
         AppInfo info = this.adapter.getItem(position);
         if (info.getPermission().length > 0) {
-            AndPermission.with(this)
-                    .runtime()
+            XXPermissions.with(this)
                     .permission(info.getPermission())
-                    .onGranted(permissions -> startApp(info))
-                    .onDenied(permissions -> setToastString("获取权限失败，请检查"))
-                    .start();
+                    .request(new OnPermissionCallback() {
+                        @Override
+                        public void onGranted(List<String> permissions, boolean all) {
+                            startApp(info);
+                        }
+
+                        @Override
+                        public void onDenied(List<String> permissions, boolean never) {
+                            setToastString("获取权限失败，请检查");
+                        }
+                    });
             return;
         }
         startApp(info);

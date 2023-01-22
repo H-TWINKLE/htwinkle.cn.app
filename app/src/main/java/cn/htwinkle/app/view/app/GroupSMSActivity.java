@@ -13,17 +13,12 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.yanzhenjie.permission.runtime.Permission;
-
-import net.sourceforge.pinyin4j.PinyinHelper;
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+import com.hjq.permissions.Permission;
 
 import org.xutils.ex.DbException;
 import org.xutils.view.annotation.ContentView;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +44,8 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     public static final String TITLE = "群发短信";
     public static final String EDIT_TEXT = "EDIT_TEXT";
+
+    private static final SortChineseName sortChineseName = new SortChineseName();
 
     private EditText base_rich_text_et;
     private FloatingActionButton base_rich_fab;
@@ -137,12 +134,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
      */
     private void combineData() {
         List<SmsPerson> smsPeople = PhoneKit.INSTANCE.getPhone(this).stream()
-                .sorted((t0, t1) -> {
-                    if (TextUtils.isEmpty(t0.getName()) || TextUtils.isEmpty(t1.getName())) {
-                        return -1;
-                    }
-                    return getPinYinName(t0.getName()).compareTo(getPinYinName(t1.getName()));
-                }).collect(Collectors.toList());
+                .sorted(sortChineseName).collect(Collectors.toList());
         smsPeople = smsPeople.stream().filter(item ->
                 !TextUtils.isEmpty(item.getName()) && item.getName().length() < 4
         ).collect(Collectors.toList());
@@ -223,37 +215,19 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         return index + "/" + allCount + " . " + name + " 发送短信";
     }
 
-    private String getPinYinName(String text) {
-        if (TextUtils.isEmpty(text)) {
-            return "";
-        }
-        return getFirstLetter(text);
-    }
+    public static class SortChineseName implements Comparator<SmsPerson> {
 
-    /**
-     * 取第一个汉字的第一个字符
-     *
-     * @return String
-     */
-    public static String getFirstLetter(String ChineseLanguage) {
-        char[] cl_chars = ChineseLanguage.trim().toCharArray();
-        String hanyupinyin = "";
-        HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
-        defaultFormat.setCaseType(HanyuPinyinCaseType.UPPERCASE);// 输出拼音全部大写
-        defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);// 不带声调
-        try {
-            String str = String.valueOf(cl_chars[0]);
-            if (str.matches("[\u4e00-\u9fa5]+")) {// 如果字符是中文,则将中文转为汉语拼音,并取第一个字母
-                hanyupinyin = PinyinHelper.toHanyuPinyinStringArray(
-                        cl_chars[0], defaultFormat)[0].substring(0, 1);
-            } else if (str.matches("[0-9]+")) {// 如果字符是数字,取数字
-                hanyupinyin += cl_chars[0];
-            } else if (str.matches("[a-zA-Z]+")) {// 如果字符是字母,取字母
+        Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
 
-                hanyupinyin += cl_chars[0];
+        @Override
+        public int compare(SmsPerson o1, SmsPerson o2) {
+            if (cmp.compare(o1.getName(), o2.getName()) > 0) {
+                return 1;
+
+            } else if (cmp.compare(o1.getName(), o2.getName()) < 0) {
+                return -1;
             }
-        } catch (BadHanyuPinyinOutputFormatCombination ignored) {
+            return 0;
         }
-        return hanyupinyin;
     }
 }
