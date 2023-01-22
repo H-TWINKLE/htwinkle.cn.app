@@ -19,8 +19,14 @@ public class SmsPerson {
     @Column(name = "telPhone", isId = true, autoGen = false, property = "NOT NULL")
     private String telPhone;
 
+    @Column(name = "sendName")
+    private String sendName;
+
     @Column(name = "checked")
     private boolean checked;
+
+    @Column(name = "backUp")
+    private boolean backUp;
 
     public String getName() {
         return name;
@@ -44,6 +50,22 @@ public class SmsPerson {
 
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public String getSendName() {
+        return sendName;
+    }
+
+    public void setSendName(String sendName) {
+        this.sendName = sendName;
+    }
+
+    public boolean isBackUp() {
+        return backUp;
+    }
+
+    public void setBackUp(boolean backUp) {
+        this.backUp = backUp;
     }
 
     public void saveSelfSafety() {

@@ -20,8 +20,11 @@ import org.xutils.view.annotation.ContentView;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import cn.htwinkle.app.R;
@@ -60,9 +63,12 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     @Override
     public void initData() {
         setToolBarTitle(TITLE);
-        adapter = new SmsPersonAdapter(R.layout.item_sms_person);
+        adapter = new SmsPersonAdapter(R.layout.item_sms_person_main, this);
         adapter.addHeaderView(initHeaderView1());
-        adapter.addChildClickViewIds(R.id.item_sms_person_cb);
+        adapter.addHeaderView(initHeaderView2());
+        adapter.addChildClickViewIds(R.id.item_sms_person_send_name_tv,
+                R.id.item_sms_person_cb_enable,
+                R.id.item_sms_person_cb_back_up);
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
         getData();
     }
@@ -73,7 +79,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     }
 
     /**
-     * 邀请好友
+     * 初始化富文本框
      *
      * @return View
      */
@@ -119,6 +125,53 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         return headerView;
     }
 
+    private View initHeaderView2() {
+        View headerView = View.inflate(this, R.layout.item_sms_person_sample, null);
+        headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        return headerView;
+    }
+
+    /**
+     * 组合数据和缓存数据
+     */
+    private void combineData() {
+        // 获取系统的电话信息
+        Map<String, SmsPerson> smsPeople = PhoneKit.INSTANCE.getPhoneTelInfo(this).stream()
+                .sorted(sortChineseName)
+                .filter(item -> !TextUtils.isEmpty(item.getName()) && item.getName().length() < 4)
+                .collect(Collectors.toMap(SmsPerson::getTelPhone, Function.identity(), (key1, key2) -> key2));
+
+        // 获取缓存的人
+        Map<String, SmsPerson> cachePeople = getCachePerson();
+
+        // 以缓存的人的信息为主
+        smsPeople.putAll(cachePeople);
+
+        List<SmsPerson> peopleList = new ArrayList<>();
+
+        peopleList.addAll(smsPeople
+                .values()
+                .stream()
+                .filter(SmsPerson::isChecked)
+                .sorted(sortChineseName)
+                .collect(Collectors.toList()));
+
+        peopleList.addAll(smsPeople
+                .values()
+                .stream()
+                .filter(item -> !item.isChecked())
+                .sorted(sortChineseName)
+                .collect(Collectors.toList()));
+
+        onSuccessGetData(peopleList);
+    }
+
+    /**
+     * 发送短信
+     *
+     * @param canSend canSend
+     */
     private void toSendMessage(List<SmsPerson> canSend) {
         base_rich_fab.setEnabled(false);
         String sendText = base_rich_text_et.getText().toString();
@@ -129,43 +182,18 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         }
     }
 
-    /**
-     * 组合数据和缓存数据
-     */
-    private void combineData() {
-        List<SmsPerson> smsPeople = PhoneKit.INSTANCE.getPhone(this).stream()
-                .sorted(sortChineseName).collect(Collectors.toList());
-        smsPeople = smsPeople.stream().filter(item ->
-                !TextUtils.isEmpty(item.getName()) && item.getName().length() < 4
-        ).collect(Collectors.toList());
-        List<SmsPerson> cachePeople = getCachePerson();
-        for (int smsIndex = 0; smsIndex < smsPeople.size(); smsIndex++) {
-            SmsPerson smsPerson = smsPeople.get(smsIndex);
-            for (int cacheIndex = 0; cacheIndex < cachePeople.size(); cacheIndex++) {
-                SmsPerson cachePerson = cachePeople.get(cacheIndex);
-                if (!TextUtils.isEmpty(smsPerson.getTelPhone()) &&
-                        smsPerson.getTelPhone().equals(cachePerson.getTelPhone())) {
-                    smsPeople.set(smsIndex, cachePerson);
-                }
-            }
-        }
-        smsPeople = smsPeople
-                .stream()
-                .sorted(Comparator.comparing(SmsPerson::isChecked).reversed())
-                .collect(Collectors.toList());
-        onSuccessGetData(smsPeople);
-    }
-
-    private List<SmsPerson> getCachePerson() {
+    private Map<String, SmsPerson> getCachePerson() {
         try {
             List<SmsPerson> list = DbKit.INSTANCE.getDb().findAll(SmsPerson.class);
             if (list != null) {
-                return list;
+                return list.stream()
+                        .filter(item -> !TextUtils.isEmpty(item.getTelPhone()))
+                        .collect(Collectors.toMap(SmsPerson::getTelPhone, Function.identity(), (key1, key2) -> key2));
             }
         } catch (DbException e) {
             Log.e(TAG, "getCachePerson: " + e.getLocalizedMessage());
         }
-        return new ArrayList<>();
+        return Collections.emptyMap();
     }
 
     private void saveEditText(String text) {

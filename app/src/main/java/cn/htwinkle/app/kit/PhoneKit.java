@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,21 +23,24 @@ public enum PhoneKit {
     private Uri phoneUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
 
     //获取所有联系人
-    public List<SmsPerson> getPhone(Context context) {
+    public List<SmsPerson> getPhoneTelInfo(Context context) {
         List<SmsPerson> smsPeople = new ArrayList<>();
         ContentResolver cr = context.getContentResolver();
         Cursor cursor = cr.query(phoneUri, new String[]{NUM, NAME}, null, null, null);
         while (cursor.moveToNext()) {
             SmsPerson smsPerson = new SmsPerson();
-            int nameI = cursor.getColumnIndex(NAME);
-            if (nameI > -1) {
-                smsPerson.setName(cursor.getString(nameI));
+            int nameIndex = cursor.getColumnIndex(NAME);
+            if (nameIndex > -1) {
+                smsPerson.setName(cursor.getString(nameIndex));
+                smsPerson.setSendName(cursor.getString(nameIndex));
             }
-            int numI = cursor.getColumnIndex(NUM);
-            if (numI > -1) {
-                smsPerson.setTelPhone(cursor.getString(numI));
+            int numIndex = cursor.getColumnIndex(NUM);
+            if (numIndex > -1) {
+                smsPerson.setTelPhone(cursor.getString(numIndex));
             }
-            smsPeople.add(smsPerson);
+            if (!TextUtils.isEmpty(smsPerson.getName()) && !TextUtils.isEmpty(smsPerson.getTelPhone())) {
+                smsPeople.add(smsPerson);
+            }
         }
         return smsPeople;
     }

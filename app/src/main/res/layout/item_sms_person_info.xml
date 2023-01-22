@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/item_sms_person_index_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:maxLines="1"
+        android:minWidth="20dp"
+        android:textAlignment="center"
+        android:textColor="#DA6363"
+        android:textSize="15sp"
+        android:text="#"
+        tools:text="1" />
+
+    <include
+        layout="@layout/base_div_line"
+        android:layout_width="2dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp" />
+
+    <TextView
+        android:id="@+id/item_sms_person_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:text="名字"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        tools:text="真实名称" />
+
+    <TextView
+        android:id="@+id/item_sms_person_send_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:text="发送名字"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        tools:text="发送的名称" />
+
+    <TextView
+        android:id="@+id/item_sms_person_tel_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_weight="4"
+        android:text="电话"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        tools:text="131112312131" />
+
+</LinearLayout>

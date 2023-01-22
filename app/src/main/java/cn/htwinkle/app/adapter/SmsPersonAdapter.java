@@ -1,10 +1,17 @@
 package cn.htwinkle.app.adapter;
 
-import android.text.Editable;
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.text.InputType;
 import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -19,8 +26,11 @@ public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder
 
     private static final String TAG = "SmsPersonAdapter";
 
-    public SmsPersonAdapter(int layoutResId) {
+    private final Activity activity;
+
+    public SmsPersonAdapter(int layoutResId, Activity activity) {
         super(layoutResId);
+        this.activity = activity;
     }
 
     @Override
@@ -29,37 +39,72 @@ public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder
         holder.setText(R.id.item_sms_person_index_tv, getItemPosition(smsPerson) + 1 + "");
         holder.setText(R.id.item_sms_person_tel_tv, StrKit.safetyText(smsPerson.getTelPhone()));
 
-        CheckBox checkBox = holder.getView(R.id.item_sms_person_cb);
-        checkBox.setOnCheckedChangeListener(null);
-        checkBox.setChecked(smsPerson.isChecked());
-        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        CheckBox enableCb = holder.getView(R.id.item_sms_person_cb_enable);
+        enableCb.setOnCheckedChangeListener(null);
+        enableCb.setChecked(smsPerson.isChecked());
+        enableCb.setTag(smsPerson);
+        enableCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
             smsPerson.setChecked(isChecked);
-            if (isChecked && !TextUtils.isEmpty(smsPerson.getName())) {
-                smsPerson.saveSelfSafety();
-            } else {
-                smsPerson.deleteSelf();
-            }
+            saveInfo(smsPerson);
         });
 
-        EditText nameEt = holder.getView(R.id.item_sms_person_name_et);
-        nameEt.setText(StrKit.safetyText(smsPerson.getName()));
-        nameEt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (nameEt.isFocused()) {
-                    smsPerson.setName(s.toString());
-                }
-            }
+        CheckBox backUpCb = holder.getView(R.id.item_sms_person_cb_back_up);
+        backUpCb.setOnCheckedChangeListener(null);
+        backUpCb.setChecked(smsPerson.isBackUp());
+        backUpCb.setTag(smsPerson);
+        backUpCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            smsPerson.setBackUp(isChecked);
+            saveInfo(smsPerson);
         });
+
+        TextView nameTv = holder.getView(R.id.item_sms_person_name_tv);
+        nameTv.setText(StrKit.safetyText(smsPerson.getName()));
+
+        TextView sendNameTv = holder.getView(R.id.item_sms_person_send_name_tv);
+        sendNameTv.setText(StrKit.safetyText(smsPerson.getSendName()));
+        sendNameTv.setOnClickListener(view -> {
+            changeSendName(smsPerson, view);
+        });
+    }
+
+    private void changeSendName(SmsPerson smsPerson, View view) {
+        View dialogView = LayoutInflater.from(activity).inflate(R.layout.base_dialog_edit, null);
+        EditText sendNameEt = dialogView.findViewById(R.id.base_dialog_text_et);
+        sendNameEt.setText(smsPerson.getSendName());
+        sendNameEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        sendNameEt.setSelection(smsPerson.getSendName().length());
+        sendNameEt.postDelayed(() -> {
+            sendNameEt.requestFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+            imm.showSoftInput(sendNameEt, InputMethodManager.SHOW_IMPLICIT);
+        }, 100);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(activity)
+                .setView(dialogView)
+                .setTitle("请输入发送名字")
+                .setPositiveButton("确定", (dialogInterface, i) -> {
+                    activity.runOnUiThread(() -> {
+                        smsPerson.setSendName(sendNameEt.getText().toString());
+                        saveInfo(smsPerson);
+                        notifyDataSetChanged();
+                    });
+                    dialogInterface.cancel();
+                })
+                .setNegativeButton("取消", (dialogInterface, i) -> dialogInterface.cancel())
+                .create();
+
+        alertDialog.show();
+    }
+
+    private void saveInfo(SmsPerson smsPerson) {
+        if (!TextUtils.isEmpty(smsPerson.getSendName())) {
+            smsPerson.saveSelfSafety();
+        }
+
+        if (!smsPerson.isChecked() && !smsPerson.isBackUp()) {
+            smsPerson.deleteSelf();
+        }
+
+        // todo 备份用户信息到云端
     }
 }
