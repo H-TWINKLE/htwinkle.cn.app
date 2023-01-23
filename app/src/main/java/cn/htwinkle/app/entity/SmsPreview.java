@@ -9,7 +9,8 @@ public class SmsPreview {
     // 发送的状态
     private Integer status = -999;
 
-    public static final int SUCCESS = 1;
+    public static final int PREPARE = 1;
+    public static final int SUCCESS = 2;
     public static final int FAILURE = 0;
     public static final int ERROR = -1;
 

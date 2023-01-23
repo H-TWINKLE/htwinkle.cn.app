@@ -1,6 +1,8 @@
 package cn.htwinkle.app.adapter;
 
 import android.app.Activity;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -28,14 +30,19 @@ public class SmsPreviewAdapter extends BaseQuickAdapter<SmsPreview, BaseViewHold
         holder.setText(R.id.item_sms_preview_text_tv, smsPreview.getSendText());
         holder.setText(R.id.item_sms_preview_tel_tv, smsPreview.getSmsPerson().getTelPhone());
 
+        ImageView imageView = holder.getView(R.id.item_sms_preview_status_iv);
+        TextView telTv = holder.getView(R.id.item_sms_preview_tel_tv);
+
         if (smsPreview.getStatus() == SmsPreview.SUCCESS) {
-            holder.setImageResource(R.id.item_sms_preview_status_iv, R.drawable.round_check_circle_outline_light_green_a700_36dp);
+            telTv.setTextColor(activity.getResources().getColor(R.color.ok));
+            imageView.setImageResource(R.drawable.round_check_circle_outline_light_green_a700_36dp);
         } else if (smsPreview.getStatus() == SmsPreview.FAILURE) {
-            holder.setImageResource(R.id.item_sms_preview_status_iv, R.drawable.round_close_red_500_36dp);
+            imageView.setImageResource(R.drawable.round_close_red_500_36dp);
         } else if (smsPreview.getStatus() == SmsPreview.ERROR) {
-            holder.setImageResource(R.id.item_sms_preview_status_iv, R.drawable.round_error_deep_orange_800_36dp);
+            imageView.setImageResource(R.drawable.round_error_deep_orange_800_36dp);
         } else {
-            holder.setImageBitmap(R.id.item_sms_preview_status_iv, null);
+            imageView.setImageBitmap(null);
+            telTv.setTextColor(activity.getResources().getColor(R.color.black_description));
         }
 
     }

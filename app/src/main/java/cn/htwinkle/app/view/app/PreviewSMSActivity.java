@@ -64,6 +64,15 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
                     smsPreviewList.size(), i + 1,
                     new SMSKit.Listener() {
                         @Override
+                        public void onPrepare(String tel, String text) {
+                            Optional<SmsPreview> finder = getFinder(tel);
+                            finder.ifPresent(item -> {
+                                item.setStatus(SmsPreview.PREPARE);
+                                updateView(finalI);
+                            });
+                        }
+
+                        @Override
                         public void onSuccess(String tel, String text) {
                             Optional<SmsPreview> finder = getFinder(tel);
                             finder.ifPresent(item -> {

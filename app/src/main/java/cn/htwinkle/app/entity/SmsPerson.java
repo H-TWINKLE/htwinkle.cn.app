@@ -68,6 +68,10 @@ public class SmsPerson {
         this.backUp = backUp;
     }
 
+    public String extendText() {
+        return getTelPhone() + "_" + getName() + "_" + getSendName();
+    }
+
     public void saveSelfSafety() {
         try {
             DbKit.INSTANCE.getDb().saveOrUpdate(this);

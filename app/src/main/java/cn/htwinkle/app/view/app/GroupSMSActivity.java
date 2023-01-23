@@ -55,7 +55,10 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     private static final SortChineseName sortChineseName = new SortChineseName();
 
     private EditText base_rich_text_et;
+    private EditText filterEt;
     private FloatingActionButton base_rich_fab;
+
+    private String filteredText = "";
 
     @Override
     public void finish() {
@@ -68,6 +71,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         setToolBarTitle(TITLE);
         adapter = new SmsPersonAdapter(R.layout.item_sms_person_main, this);
         adapter.addHeaderView(initHeaderView1());
+        adapter.addHeaderView(initHeaderView1_5());
         adapter.addHeaderView(initHeaderView2());
         adapter.addChildClickViewIds(R.id.item_sms_person_send_name_tv,
                 R.id.item_sms_person_cb_enable,
@@ -92,6 +96,8 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         base_rich_text_et = headerView.findViewById(R.id.base_rich_text_et);
         base_rich_text_et.setText(loadEditText());
+        base_rich_text_et.setTag(new Object());
+        base_rich_text_et.setFocusable(false);
         base_rich_text_et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -125,6 +131,33 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                 return;
             }
             setToastString("请勾选需要发送的联系人");
+        });
+        return headerView;
+    }
+
+    private View initHeaderView1_5() {
+        View headerView = View.inflate(this, R.layout.base_dialog_edit, null);
+        headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        EditText filterEt = headerView.findViewById(R.id.base_dialog_text_et);
+        filterEt.setTag(filteredText);
+        filterEt.setHint("请输入过滤条件 ...");
+        filterEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filteredText = editable.toString();
+                combineData();
+            }
         });
         return headerView;
     }
@@ -168,7 +201,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                 .sorted(sortChineseName)
                 .collect(Collectors.toList()));
 
-        onSuccessGetData(peopleList);
+        onSuccessGetData(peopleList.stream().filter(item -> item.extendText().contains(filteredText)).collect(Collectors.toList()));
     }
 
     /**

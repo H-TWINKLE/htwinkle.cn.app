@@ -14,6 +14,10 @@ public enum SMSKit {
 
     public void sendMessage(boolean debug, String tel, String text, int allCount, int nowCount, Listener listener) {
         POOL_EXECUTOR.submit(() -> {
+            if (listener != null) {
+                listener.onPrepare(tel, text);
+            }
+
             if (sendSms(debug, tel, text)) {
                 if (listener != null) {
                     listener.onSuccess(tel, text);
@@ -23,6 +27,7 @@ public enum SMSKit {
                     listener.onFail(tel, text);
                 }
             }
+
             if (allCount == nowCount && listener != null) {
                 listener.onFinish();
             }
@@ -51,6 +56,8 @@ public enum SMSKit {
     }
 
     public interface Listener {
+        void onPrepare(String tel, String text);
+
         void onSuccess(String tel, String text);
 
         void onFail(String tel, String text);
