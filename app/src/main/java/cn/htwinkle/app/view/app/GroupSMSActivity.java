@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.alibaba.fastjson.JSONObject;
@@ -54,8 +55,8 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     private static final SortChineseName sortChineseName = new SortChineseName();
 
-    private EditText base_rich_text_et;
-    private EditText filterEt;
+    private EditText richSendTextEt;
+    private EditText filterTextEt;
     private FloatingActionButton base_rich_fab;
 
     private String filteredText = "";
@@ -94,11 +95,9 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         View headerView = View.inflate(this, R.layout.item_sms_edit, null);
         headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        base_rich_text_et = headerView.findViewById(R.id.base_rich_text_et);
-        base_rich_text_et.setText(loadEditText());
-        base_rich_text_et.setTag(new Object());
-        base_rich_text_et.setFocusable(false);
-        base_rich_text_et.addTextChangedListener(new TextWatcher() {
+        richSendTextEt = headerView.findViewById(R.id.base_rich_text_et);
+        richSendTextEt.setText(loadEditText());
+        richSendTextEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -116,7 +115,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         });
         base_rich_fab = headerView.findViewById(R.id.base_rich_fab);
         base_rich_fab.setOnClickListener(v -> {
-            if (TextUtils.isEmpty(base_rich_text_et.getText())) {
+            if (TextUtils.isEmpty(richSendTextEt.getText())) {
                 setToastString("请填写内容");
                 return;
             }
@@ -139,10 +138,10 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         View headerView = View.inflate(this, R.layout.base_dialog_edit, null);
         headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        EditText filterEt = headerView.findViewById(R.id.base_dialog_text_et);
-        filterEt.setTag(filteredText);
-        filterEt.setHint("请输入过滤条件 ...");
-        filterEt.addTextChangedListener(new TextWatcher() {
+        filterTextEt = headerView.findViewById(R.id.base_dialog_text_et);
+        filterTextEt.setTag(filteredText);
+        filterTextEt.setHint("请输入过滤条件 ...");
+        filterTextEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -157,6 +156,11 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
             public void afterTextChanged(Editable editable) {
                 filteredText = editable.toString();
                 combineData();
+                filterTextEt.postDelayed(() -> {
+                    filterTextEt.requestFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(filterTextEt, InputMethodManager.SHOW_IMPLICIT);
+                }, 50);
             }
         });
         return headerView;
@@ -210,7 +214,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
      * @param canSend canSend
      */
     private void toPreviewSendMessage(List<SmsPerson> canSend) {
-        String sendText = base_rich_text_et.getText().toString();
+        String sendText = richSendTextEt.getText().toString();
         if (StrUtil.isEmpty(sendText)) {
             setToastString("请填写短信文字");
             return;

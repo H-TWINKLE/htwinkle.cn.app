@@ -59,10 +59,12 @@
 
         <activity
             android:name=".view.MainActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".view.app.GroupSMSActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
