@@ -1,7 +1,6 @@
 package cn.htwinkle.app.view.app;
 
-import android.os.Handler;
-import android.telephony.SmsManager;
+import android.content.Intent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -10,8 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import androidx.annotation.NonNull;
-
+import com.alibaba.fastjson.JSONObject;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hjq.permissions.Permission;
 
@@ -31,10 +29,13 @@ import cn.htwinkle.app.R;
 import cn.htwinkle.app.adapter.SmsPersonAdapter;
 import cn.htwinkle.app.annotation.AppModule;
 import cn.htwinkle.app.entity.SmsPerson;
+import cn.htwinkle.app.entity.SmsPreview;
 import cn.htwinkle.app.kit.DbKit;
 import cn.htwinkle.app.kit.PhoneKit;
 import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 
 @AppModule(value = GroupSMSActivity.TITLE,
         description = "自定义称谓的群发信息",
@@ -48,11 +49,13 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     public static final String TITLE = "群发短信";
     public static final String EDIT_TEXT = "EDIT_TEXT";
 
+    public static final String PREVIEW_LIST = "PREVIEW_LIST";
+    public static final String PREVIEW_TEXT = "PREVIEW_TEXT";
+
     private static final SortChineseName sortChineseName = new SortChineseName();
 
     private EditText base_rich_text_et;
     private FloatingActionButton base_rich_fab;
-    private final Handler handler = new android.os.Handler();
 
     @Override
     public void finish() {
@@ -115,9 +118,10 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                     this.adapter.getData()
                             .stream()
                             .filter(item -> item.isChecked() && !TextUtils.isEmpty(item.getName()))
+                            .sorted(sortChineseName)
                             .collect(Collectors.toList());
             if (canSend.size() > 0) {
-                toSendMessage(canSend);
+                toPreviewSendMessage(canSend);
                 return;
             }
             setToastString("请勾选需要发送的联系人");
@@ -172,14 +176,21 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
      *
      * @param canSend canSend
      */
-    private void toSendMessage(List<SmsPerson> canSend) {
-        base_rich_fab.setEnabled(false);
+    private void toPreviewSendMessage(List<SmsPerson> canSend) {
         String sendText = base_rich_text_et.getText().toString();
-        for (int x = 0; x < canSend.size(); x++) {
-            SmsPerson smsPerson = canSend.get(x);
-            sendSms(x + 1, canSend.size(), smsPerson.getName(), smsPerson.getTelPhone(),
-                    smsPerson.getName() + sendText);
+        if (StrUtil.isEmpty(sendText)) {
+            setToastString("请填写短信文字");
+            return;
         }
+        if (CollUtil.isEmpty(canSend)) {
+            setToastString("请确认群发短信人员");
+            return;
+        }
+        Intent intent = new Intent(this, PreviewSMSActivity.class);
+        intent.putExtra(PREVIEW_TEXT, sendText);
+        List<SmsPreview> smsPreviewList = canSend.stream().map(item -> new SmsPreview(sendText, item)).collect(Collectors.toList());
+        intent.putExtra(PREVIEW_LIST, JSONObject.toJSONString(smsPreviewList));
+        startActivity(intent);
     }
 
     private Map<String, SmsPerson> getCachePerson() {
@@ -202,45 +213,6 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     private String loadEditText() {
         return SharedPrefsKit.INSTANCE.getStr(this, EDIT_TEXT, "");
-    }
-
-    /**
-     * 发送短信服务
-     *
-     * @param name name
-     * @param tel  tel
-     * @param text text
-     */
-    private void sendSms(int index, int allCount, String name, String tel, String text) {
-        try {
-            SmsManager manager = SmsManager.getDefault();
-            ArrayList<String> strings = manager.divideMessage(text);
-            handler.postDelayed(() -> {
-                for (int i = 0; i < strings.size(); i++) {
-                    manager.sendTextMessage(tel, null, strings.get(i), null, null);
-                }
-                setToastString(getSenderToast(index, allCount, name) + "成功 " + tel);
-                if (index == allCount) {
-                    setToastString(String.format("发送完成，合计发送 %s 条", allCount));
-                    base_rich_fab.setEnabled(true);
-                }
-            }, 2000);
-        } catch (Exception e) {
-            setToastString(getSenderToast(index, allCount, name) + "失败：" + e.getLocalizedMessage());
-        }
-    }
-
-    /**
-     * 发送信息提示
-     *
-     * @param index    index
-     * @param allCount allCount
-     * @param name     name
-     * @return String
-     */
-    @NonNull
-    private String getSenderToast(int index, int allCount, String name) {
-        return index + "/" + allCount + " . " + name + " 发送短信";
     }
 
     public static class SortChineseName implements Comparator<SmsPerson> {

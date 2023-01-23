@@ -7,4 +7,5 @@
     <string name="progress">正在加载</string>
     <string name="et_base_hint">请填写内容 ···</string>
     <string name="skip">跳过</string>
+    <string name="test">测试</string>
 </resources>
