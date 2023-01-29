@@ -250,7 +250,10 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
             if (CollUtil.isEmpty(safety)) {
                 return Collections.emptyMap();
             }
-            return safety.stream().map(SmsGroupOut::of).collect(Collectors.toMap(SmsPerson::getTelPhone, Function.identity(), (key1, key2) -> key2));
+            return safety.stream()
+                    .map(SmsGroupOut::of)
+                    .peek(SmsPerson::saveSelfSafety)
+                    .collect(Collectors.toMap(SmsPerson::getTelPhone, Function.identity(), (key1, key2) -> key2));
         }
         return Collections.emptyMap();
     }
