@@ -3,17 +3,14 @@ package cn.htwinkle.app.kit;
 import android.telephony.SmsManager;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
 
 import cn.hutool.core.thread.ThreadUtil;
 
 public enum SMSKit {
     INSTANCE;
 
-    public static final ExecutorService POOL_EXECUTOR = ThreadUtil.newSingleExecutor();
-
     public void sendMessage(boolean debug, String tel, String text, int allCount, int nowCount, Listener listener) {
-        POOL_EXECUTOR.submit(() -> {
+        CommKit.POOL_EXECUTOR.submit(() -> {
             if (listener != null) {
                 listener.onPrepare(tel, text);
             }

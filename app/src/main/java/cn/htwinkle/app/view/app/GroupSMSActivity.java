@@ -21,6 +21,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -29,20 +30,25 @@ import java.util.stream.Collectors;
 import cn.htwinkle.app.R;
 import cn.htwinkle.app.adapter.SmsPersonAdapter;
 import cn.htwinkle.app.annotation.AppModule;
+import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.SmsPerson;
 import cn.htwinkle.app.entity.SmsPreview;
+import cn.htwinkle.app.entity.sms.SmsGroupOut;
+import cn.htwinkle.app.kit.CommKit;
 import cn.htwinkle.app.kit.DbKit;
+import cn.htwinkle.app.kit.HttpKit;
 import cn.htwinkle.app.kit.PhoneKit;
 import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 
 @AppModule(value = GroupSMSActivity.TITLE,
         description = "自定义称谓的群发信息",
         imgResourcesId = R.drawable.welcome_default_pic,
         permissions = {Permission.SEND_SMS, Permission.RECEIVE_SMS, Permission.READ_SMS,
-                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS}
+                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS, Permission.READ_PHONE_STATE}
 )
 @ContentView(R.layout.base_recycler_with_toolbar)
 public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAdapter> {
@@ -54,6 +60,8 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     public static final String PREVIEW_TEXT = "PREVIEW_TEXT";
 
     private static final SortChineseName sortChineseName = new SortChineseName();
+
+    private boolean loadRemoteFirst = false;
 
     private EditText richSendTextEt;
     private EditText filterTextEt;
@@ -83,7 +91,8 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     @Override
     public void getData() {
-        combineData();
+
+        CommKit.POOL_EXECUTOR.execute(this::combineData);
     }
 
     /**
@@ -189,6 +198,10 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         // 以缓存的人的信息为主
         smsPeople.putAll(cachePeople);
 
+        // 以远程的人信息为主(仅加载一次)
+        Map<String, SmsPerson> remoteData = getRemoteData();
+        smsPeople.putAll(remoteData);
+
         List<SmsPerson> peopleList = new ArrayList<>();
 
         peopleList.addAll(smsPeople
@@ -205,7 +218,33 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                 .sorted(sortChineseName)
                 .collect(Collectors.toList()));
 
-        onSuccessGetData(peopleList.stream().filter(item -> item.extendText().contains(filteredText)).collect(Collectors.toList()));
+        List<SmsPerson> data = peopleList.stream()
+                .filter(item -> item.extendText().contains(filteredText))
+                .collect(Collectors.toList());
+
+        runOnUiThread(() -> onSuccessGetData(data));
+    }
+
+    private Map<String, SmsPerson> getRemoteData() {
+        String sn = PhoneKit.INSTANCE.getDeviceId(this);
+        if (!loadRemoteFirst && StrUtil.isNotEmpty(sn)) {
+            loadRemoteFirst = true;
+            List<SmsGroupOut> safety = CommKit.safety(() -> {
+                Map<String, Object> params = new HashMap<>();
+                params.put("sn", sn);
+                String text = HttpUtil.get(HttpConstant.GET_LIST_BY, params, 3000);
+                String baseData = HttpKit.INSTANCE.getBaseData(text);
+                if (StrUtil.isEmpty(baseData)) {
+                    return null;
+                }
+                return JSONObject.parseArray(baseData, SmsGroupOut.class);
+            }, true);
+            if (CollUtil.isEmpty(safety)) {
+                return Collections.emptyMap();
+            }
+            return safety.stream().map(SmsGroupOut::of).collect(Collectors.toMap(SmsPerson::getTelPhone, Function.identity(), (key1, key2) -> key2));
+        }
+        return Collections.emptyMap();
     }
 
     /**

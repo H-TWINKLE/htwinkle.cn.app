@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import cn.hutool.core.util.StrUtil;
 import okhttp3.Callback;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -132,6 +133,19 @@ public enum HttpKit {
             // request.addHeader(FROM_MOBILE, UserKit.INSTANCE.getToken());
         }
         HttpKit.OK_HTTP_CLIENT.newCall(request.build()).enqueue(callback);
+    }
+
+    public String getBaseData(String data) {
+        if (StrUtil.isEmpty(data)) {
+            return null;
+        }
+        return CommKit.safety(() -> {
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            if (jsonObject.containsKey("state") && "ok".equals(jsonObject.get("state")) && jsonObject.containsKey("data")) {
+                return jsonObject.getString("data");
+            }
+            return null;
+        });
     }
 
 }

@@ -15,12 +15,18 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.alibaba.fastjson.JSONObject;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.viewholder.BaseViewHolder;
 
 import cn.htwinkle.app.R;
+import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.SmsPerson;
+import cn.htwinkle.app.entity.sms.SmsGroupOut;
+import cn.htwinkle.app.kit.CommKit;
 import cn.htwinkle.app.kit.StrKit;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 
 public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder> {
 
@@ -105,6 +111,24 @@ public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder
             smsPerson.deleteSelf();
         }
 
-        // todo 备份用户信息到云端
+        if (smsPerson.isBackUp()) {
+            CommKit.safety(() -> CommKit.POOL_EXECUTOR.submit(() -> {
+                SmsGroupOut smsGroupOut = new SmsGroupOut(smsPerson, activity);
+                if (StrUtil.isNotEmpty(smsGroupOut.getTelSn())) {
+                    HttpUtil.post(HttpConstant.SMS_SAVE_OR_UPDATE, JSONObject.toJSONString(smsGroupOut));
+                }
+            }));
+        }
+
+        if (!smsPerson.isBackUp()) {
+            CommKit.safety(() -> CommKit.POOL_EXECUTOR.submit(() -> {
+                SmsGroupOut smsGroupOut = new SmsGroupOut(smsPerson, activity);
+                if (StrUtil.isNotEmpty(smsGroupOut.getTelSn())) {
+                    HttpUtil.post(HttpConstant.SMS_DELETE_BY, JSONObject.toJSONString(smsGroupOut));
+                }
+            }));
+        }
     }
+
+
 }

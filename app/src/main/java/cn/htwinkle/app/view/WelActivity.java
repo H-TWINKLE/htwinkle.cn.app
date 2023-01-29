@@ -29,6 +29,7 @@ import java.util.Locale;
 import cn.htwinkle.app.R;
 import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.WelPhoto;
+import cn.htwinkle.app.kit.CommKit;
 import cn.htwinkle.app.kit.HttpKit;
 import cn.htwinkle.app.kit.StrKit;
 import cn.htwinkle.app.listener.BaseHttpListener;
@@ -85,18 +86,20 @@ public class WelActivity extends BaseActivity implements BaseHttpListener.HttpLi
 
     @Override
     public void onFinish(String response) {
-        WelPhoto welPhoto = JSONObject.parseObject(response, WelPhoto.class);
-        if (StrKit.isOk(welPhoto.getState()) && !welPhoto.getList().isEmpty()) {
-            runOnUiThread(() ->
-            {
-                WelPhoto.ListBean bean = welPhoto.getList().get(0);
-                wel_siv_background.setImageUrl(bean.getPictureUrl());
-                wel_describe.setText(StrKit.safetyText(bean.getPictureName()));
-                if (!TextUtils.isEmpty(bean.getPictureName())) {
-                    wel_describe.setVisibility(View.VISIBLE);
-                }
-            });
-        }
+        CommKit.safety(() -> {
+            WelPhoto welPhoto = JSONObject.parseObject(response, WelPhoto.class);
+            if (StrKit.isOk(welPhoto.getState()) && !welPhoto.getList().isEmpty()) {
+                runOnUiThread(() ->
+                {
+                    WelPhoto.ListBean bean = welPhoto.getList().get(0);
+                    wel_siv_background.setImageUrl(bean.getPictureUrl());
+                    wel_describe.setText(StrKit.safetyText(bean.getPictureName()));
+                    if (!TextUtils.isEmpty(bean.getPictureName())) {
+                        wel_describe.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        }, true);
     }
 
     @Override
