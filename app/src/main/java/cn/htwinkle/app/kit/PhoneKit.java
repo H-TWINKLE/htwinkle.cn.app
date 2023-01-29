@@ -61,7 +61,7 @@ public enum PhoneKit {
     }
 
     public String getDeviceId(Context context) {
-        String androidId = CommKit.safety(this::getSdCardDeviceId, true, null);
+        String androidId = CommKit.safety(this::getSdCardDeviceId, false, null);
         if (StrUtil.isEmpty(androidId)) {
             androidId = getAndroidId(context);
         }

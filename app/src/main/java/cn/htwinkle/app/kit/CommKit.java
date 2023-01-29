@@ -26,6 +26,7 @@ public class CommKit {
             return function.get();
         } catch (Exception e) {
             if (!ignoreError) {
+                e.printStackTrace();
                 Log.e(TAG, "safety: " + e.getLocalizedMessage());
             }
         }

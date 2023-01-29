@@ -48,7 +48,8 @@ import cn.hutool.http.HttpUtil;
         description = "自定义称谓的群发信息",
         imgResourcesId = R.drawable.welcome_default_pic,
         permissions = {Permission.SEND_SMS, Permission.RECEIVE_SMS, Permission.READ_SMS,
-                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS, Permission.READ_PHONE_STATE}
+                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS,
+                Permission.READ_PHONE_STATE, Permission.MANAGE_EXTERNAL_STORAGE}
 )
 @ContentView(R.layout.base_recycler_with_toolbar)
 public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAdapter> {
@@ -77,7 +78,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     @Override
     public void initData() {
-        setToolBarTitle(TITLE);
+        setToolBarTitle(TITLE + getDeviceId());
         adapter = new SmsPersonAdapter(R.layout.item_sms_person_main, this);
         adapter.addHeaderView(initHeaderView1());
         adapter.addHeaderView(initHeaderView1_5());
@@ -91,8 +92,15 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     @Override
     public void getData() {
-
         CommKit.POOL_EXECUTOR.execute(this::combineData);
+    }
+
+    private String getDeviceId() {
+        String deviceId = PhoneKit.INSTANCE.getDeviceId(this);
+        if (StrUtil.isEmpty(deviceId)) {
+            return "";
+        }
+        return "  " + (deviceId.length() > 10 ? deviceId.substring(0, 10) : deviceId);
     }
 
     /**
