@@ -28,6 +28,11 @@ public class SmsPerson {
     @Column(name = "backUp")
     private boolean backUp;
 
+    /**
+     * 是否来自服务器
+     */
+    private boolean fromServer = false;
+
     public String getName() {
         return name;
     }
@@ -66,6 +71,15 @@ public class SmsPerson {
 
     public void setBackUp(boolean backUp) {
         this.backUp = backUp;
+    }
+
+    public boolean isFromServer() {
+        return fromServer;
+    }
+
+    public SmsPerson setFromServer(boolean fromServer) {
+        this.fromServer = fromServer;
+        return this;
     }
 
     public String extendText() {

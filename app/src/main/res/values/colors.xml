@@ -24,4 +24,7 @@
 
     <color name="shapes_no">#d2d2d2</color>
     <color name="shapes_yes">#959797</color>
+
+    <color name="index_base">#DA6363</color>
+    <color name="index_from_server">#41A647</color>
 </resources>

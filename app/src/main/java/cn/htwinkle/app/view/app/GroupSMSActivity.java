@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -66,6 +67,7 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     private EditText richSendTextEt;
     private EditText filterTextEt;
+    private TextView deviceIdTv;
     private FloatingActionButton base_rich_fab;
 
     private String filteredText = "";
@@ -78,10 +80,11 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
 
     @Override
     public void initData() {
-        setToolBarTitle(TITLE + getDeviceId());
+        setToolBarTitle(TITLE);
         adapter = new SmsPersonAdapter(R.layout.item_sms_person_main, this);
         adapter.addHeaderView(initHeaderView1());
         adapter.addHeaderView(initHeaderView1_5());
+        adapter.addHeaderView(initHeaderView1_6());
         adapter.addHeaderView(initHeaderView2());
         adapter.addChildClickViewIds(R.id.item_sms_person_send_name_tv,
                 R.id.item_sms_person_cb_enable,
@@ -93,14 +96,6 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
     @Override
     public void getData() {
         CommKit.POOL_EXECUTOR.execute(this::combineData);
-    }
-
-    private String getDeviceId() {
-        String deviceId = PhoneKit.INSTANCE.getDeviceId(this);
-        if (StrUtil.isEmpty(deviceId)) {
-            return "";
-        }
-        return "  " + (deviceId.length() > 10 ? deviceId.substring(0, 10) : deviceId);
     }
 
     /**
@@ -182,6 +177,17 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         });
         return headerView;
     }
+
+
+    private View initHeaderView1_6() {
+        View headerView = View.inflate(this, R.layout.base_tv, null);
+        headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        deviceIdTv = headerView.findViewById(R.id.base_tv_center_text);
+        deviceIdTv.setText(PhoneKit.INSTANCE.getDeviceId(this));
+        return headerView;
+    }
+
 
     private View initHeaderView2() {
         View headerView = View.inflate(this, R.layout.item_sms_person_sample, null);

@@ -57,6 +57,7 @@ public class SmsGroupOut implements Serializable {
         smsPerson.setChecked(getSmsSendStatus() == 1);
         smsPerson.setName(getSmsName());
         smsPerson.setTelPhone(getSmsTel());
+        smsPerson.setFromServer(true);
         return smsPerson;
     }
 
