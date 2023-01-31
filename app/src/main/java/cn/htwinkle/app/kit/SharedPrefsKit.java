@@ -78,6 +78,19 @@ public enum SharedPrefsKit {
     }
 
     /**
+     * 移除一个key到SharedPreferences
+     *
+     * @param context context
+     * @param key     key
+     */
+    public void removeKey(Context context, String key) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(key);
+        editor.apply();
+    }
+
+    /**
      * 获取默认的SharedPreferences对象
      *
      * @param context context

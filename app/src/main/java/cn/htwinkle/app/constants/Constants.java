@@ -19,4 +19,6 @@ public interface Constants {
      * SharedPreferences KEY
      */
     String SHARE_PREFERENCES_KEY = "HtwinkleCnAppData";
+
+    String GLOBAL_DEVICE_NAME = "GLOBAL_DEVICE_NAME";
 }

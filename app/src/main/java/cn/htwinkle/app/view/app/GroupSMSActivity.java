@@ -43,6 +43,7 @@ import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Db;
 import cn.hutool.http.HttpUtil;
 
 @AppModule(value = GroupSMSActivity.TITLE,
@@ -84,7 +85,6 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
         adapter = new SmsPersonAdapter(R.layout.item_sms_person_main, this);
         adapter.addHeaderView(initHeaderView1());
         adapter.addHeaderView(initHeaderView1_5());
-        adapter.addHeaderView(initHeaderView1_6());
         adapter.addHeaderView(initHeaderView2());
         adapter.addChildClickViewIds(R.id.item_sms_person_send_name_tv,
                 R.id.item_sms_person_cb_enable,
@@ -175,16 +175,6 @@ public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAd
                 }, 50);
             }
         });
-        return headerView;
-    }
-
-
-    private View initHeaderView1_6() {
-        View headerView = View.inflate(this, R.layout.base_tv, null);
-        headerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        deviceIdTv = headerView.findViewById(R.id.base_tv_center_text);
-        deviceIdTv.setText(PhoneKit.INSTANCE.getDeviceId(this));
         return headerView;
     }
 

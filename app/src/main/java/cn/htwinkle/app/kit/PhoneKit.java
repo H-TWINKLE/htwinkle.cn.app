@@ -61,15 +61,22 @@ public enum PhoneKit {
     }
 
     public String getDeviceId(Context context) {
-        String androidId = CommKit.safety(this::getSdCardDeviceId, false, null);
-        if (StrUtil.isEmpty(androidId)) {
-            androidId = getAndroidId(context);
+        String deviceId = getSfsId(context);
+        if (StrUtil.isEmpty(deviceId)) {
+            deviceId = CommKit.safety(this::getSdCardDeviceId, false, null);
         }
-        if (StrUtil.isEmpty(androidId)) {
-            androidId = "";
+        if (StrUtil.isEmpty(deviceId)) {
+            deviceId = getAndroidId(context);
         }
-        Log.i(TAG, "getDeviceId: " + androidId);
-        return androidId;
+        if (StrUtil.isEmpty(deviceId)) {
+            deviceId = "";
+        }
+        Log.i(TAG, "getDeviceId: " + deviceId);
+        return deviceId;
+    }
+
+    public String getSfsId(Context context) {
+        return SharedPrefsKit.INSTANCE.getStr(context, Constants.GLOBAL_DEVICE_NAME, "");
     }
 
     private String getAndroidId(Context context) {

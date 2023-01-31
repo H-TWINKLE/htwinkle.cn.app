@@ -1,15 +1,18 @@
 package cn.htwinkle.app.kit;
 
-import android.text.TextUtils;
+import android.content.Context;
+import android.util.Log;
 
 import org.xutils.DbManager;
 import org.xutils.ex.DbException;
 import org.xutils.x;
 
+import cn.htwinkle.app.app.MyApp;
 import cn.htwinkle.app.constants.Constants;
 
 public enum DbKit {
     INSTANCE;
+    private static final String TAG = "DbKit";
 
     private static final DbManager.DaoConfig daoConfig = new DbManager.DaoConfig()
             .setDbName(getDbName())
@@ -26,10 +29,22 @@ public enum DbKit {
             });
 
     public DbManager getDb() throws DbException {
-        return x.getDb(DbKit.daoConfig);
+        DbManager db = x.getDb(DbKit.daoConfig);
+        db.getDaoConfig().setDbName(getDbName());
+        return db;
     }
 
     public static String getDbName() {
-        return Constants.APP_PACKAGE_NAME + ".db";
+        String name = Constants.APP_PACKAGE_NAME + "_" + getKey() + ".db";
+        Log.i(TAG, "getDbName: " + name);
+        return name;
+    }
+
+    private static String getKey() {
+        Context ctx = MyApp.getCTX();
+        if (ctx == null) {
+            return "";
+        }
+        return PhoneKit.INSTANCE.getDeviceId(ctx);
     }
 }

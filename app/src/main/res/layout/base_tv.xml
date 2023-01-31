@@ -10,7 +10,7 @@
         android:layout_gravity="center"
         android:padding="1dp"
         android:text="14452255555555"
-        android:textColor="@color/black_description"
+        android:textColor="#32040404"
         android:textSize="10sp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

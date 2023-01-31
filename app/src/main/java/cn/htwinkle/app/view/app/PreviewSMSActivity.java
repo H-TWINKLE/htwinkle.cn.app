@@ -1,10 +1,15 @@
 package cn.htwinkle.app.view.app;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Build;
+import android.telephony.SubscriptionInfo;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -35,6 +40,8 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
     private String originText = "";
     private List<SmsPreview> smsPreviewList = null;
     private boolean isDebug = false;
+    // 默认的电话卡的id
+    private int simCardId = SMSKit.INSTANCE.getDefaultSimCardId();
 
     @ViewInject(R.id.base_rich_fab)
     private FloatingActionButton base_rich_fab;
@@ -42,14 +49,57 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
     @ViewInject(R.id.send_info_preview_switch)
     private SwitchMaterial send_info_preview_switch;
 
+    @ViewInject(R.id.send_info_preview_sim_iv)
+    private ImageView send_info_preview_sim_iv;
+
     @Event(R.id.base_rich_fab)
     private void onRichFabClick(View view) {
         toSendMessage();
     }
 
+    @Event(R.id.send_info_preview_sim_iv)
+    private void onSimIvClick(View view) {
+        List<SubscriptionInfo> subscriptionInfoList = SMSKit.INSTANCE.getSubscriptionInfoList(this);
+        CharSequence[] displayName = getDisplayName(subscriptionInfoList);
+
+        showDialog(subscriptionInfoList, displayName);
+    }
+
     @Event(value = R.id.send_info_preview_switch, type = CompoundButton.OnCheckedChangeListener.class)
     private void onSwitchClick(CompoundButton compoundButton, boolean b) {
         isDebug = b;
+    }
+
+    private void showDialog(List<SubscriptionInfo> subscriptionInfoList, CharSequence[] displayName) {
+        new AlertDialog.Builder(this)
+                .setTitle("请选择发送短信的SIM卡")
+                .setItems(displayName, (dialogInterface, i) -> {
+                    simCardId = subscriptionInfoList.get(i).getSubscriptionId();
+                    if (i > 0) {
+                        send_info_preview_sim_iv.setImageDrawable(getResources().getDrawable(R.drawable.dual_sim_two_line));
+                    } else {
+                        send_info_preview_sim_iv.setImageDrawable(getResources().getDrawable(R.drawable.dual_sim_one_line));
+                    }
+                })
+                .setNegativeButton("取消", (dialogInterface, i) -> dialogInterface.cancel())
+                .show();
+    }
+
+    @NonNull
+    private CharSequence[] getDisplayName(List<SubscriptionInfo> subscriptionInfoList) {
+        return subscriptionInfoList.stream()
+                .map(item -> {
+                    if (StrUtil.isNotEmpty(item.getDisplayName())) {
+                        return item.getDisplayName();
+                    }
+                    if (StrUtil.isNotEmpty(item.getCarrierName())) {
+                        return item.getCarrierName();
+                    }
+                    if (StrUtil.isNotEmpty(item.getNumber())) {
+                        return item.getNumber();
+                    }
+                    return (item.getSimSlotIndex() + 1) + "";
+                }).toArray(CharSequence[]::new);
     }
 
     private void toSendMessage() {
@@ -60,7 +110,7 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
         for (int i = 0; i < smsPreviewList.size(); i++) {
             SmsPreview smsPreview = smsPreviewList.get(i);
             int finalI = i;
-            SMSKit.INSTANCE.sendMessage(isDebug, smsPreview.getSmsPerson().getTelPhone(), smsPreview.getSendText(),
+            SMSKit.INSTANCE.sendMessage(simCardId, isDebug, smsPreview.getSmsPerson().getTelPhone(), smsPreview.getSendText(),
                     smsPreviewList.size(), i + 1,
                     new SMSKit.Listener() {
                         @Override
@@ -131,6 +181,7 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
         setToolBarTitle(TITLE);
         adapter = new SmsPreviewAdapter(R.layout.item_send_info_preview, this);
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
+        checkSimCardStatus();
         getData();
     }
 
@@ -144,5 +195,13 @@ public class PreviewSMSActivity extends BaseRefreshActivity<SmsPreview, SmsPrevi
         }
         smsPreviewList = JSONObject.parseArray(previewList, SmsPreview.class);
         onSuccessGetData(smsPreviewList);
+    }
+
+    /**
+     * 检查sim状态
+     */
+    private void checkSimCardStatus() {
+        int phoneSimCardCount = SMSKit.INSTANCE.getPhoneSimCardCount(this);
+        send_info_preview_sim_iv.setEnabled(phoneSimCardCount > 1);
     }
 }

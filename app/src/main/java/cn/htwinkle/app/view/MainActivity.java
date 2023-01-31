@@ -1,24 +1,34 @@
 package cn.htwinkle.app.view;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
 import org.xutils.view.annotation.ContentView;
+import org.xutils.view.annotation.Event;
+import org.xutils.view.annotation.ViewInject;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,12 +39,65 @@ import cn.htwinkle.app.annotation.AppModule;
 import cn.htwinkle.app.constants.Constants;
 import cn.htwinkle.app.entity.AppInfo;
 import cn.htwinkle.app.kit.ClassesReader;
+import cn.htwinkle.app.kit.CommKit;
+import cn.htwinkle.app.kit.DbKit;
+import cn.htwinkle.app.kit.PhoneKit;
+import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
+import cn.hutool.core.util.StrUtil;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
 
     private final Handler handler = new Handler();
+
+    @ViewInject(R.id.base_tv_center_text)
+    private TextView base_tv_center_text;
+
+    @Event(R.id.base_tv_center_text)
+    private void onDeviceIdClick(View view) {
+        String deviceId = PhoneKit.INSTANCE.getDeviceId(MainActivity.this);
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.base_dialog_edit, null);
+        EditText sendNameEt = dialogView.findViewById(R.id.base_dialog_text_et);
+        sendNameEt.setText(deviceId);
+        sendNameEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        sendNameEt.setSelection(deviceId.length());
+        sendNameEt.postDelayed(() -> {
+            sendNameEt.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.showSoftInput(sendNameEt, InputMethodManager.SHOW_IMPLICIT);
+        }, 100);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setTitle("请输入身份标志")
+                .setPositiveButton("确定", (dialogInterface, i) -> {
+                    runOnUiThread(() -> {
+                        Editable text = sendNameEt.getText();
+                        if (StrUtil.isEmpty(text.toString())) {
+                            setToastString("输入的身份标志为空");
+                            return;
+                        }
+                        base_tv_center_text.setText(text);
+                        SharedPrefsKit.INSTANCE.saveValue(this, Constants.GLOBAL_DEVICE_NAME, text.toString());
+                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
+                    });
+                    dialogInterface.cancel();
+                })
+                .setNeutralButton("复原", (dialogInterface, i) -> {
+                    runOnUiThread(() -> {
+                        SharedPrefsKit.INSTANCE.removeKey(this, Constants.GLOBAL_DEVICE_NAME);
+                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
+                        setDefaultDeviceId();
+                    });
+                    dialogInterface.cancel();
+                })
+                .setNegativeButton("取消", (dialogInterface, i) -> dialogInterface.cancel())
+                .create();
+
+        alertDialog.show();
+    }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +129,7 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
         adapter = new AppInfoAdapter(R.layout.item_app_info);
         adapter.setOnItemClickListener((adapter, view, position) -> preStartApp(position));
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
+        initDeviceId();
         getData();
     }
 
@@ -149,5 +213,25 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
 
     private void startApp(AppInfo info) {
         startActivity(info.gettClass());
+    }
+
+    private void initDeviceId() {
+        XXPermissions.with(this)
+                .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+                .request(new OnPermissionCallback() {
+                    @Override
+                    public void onGranted(List<String> permissions, boolean all) {
+                        setDefaultDeviceId();
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions, boolean never) {
+                        setToastString("获取文件权限失败，请检查");
+                    }
+                });
+    }
+
+    private void setDefaultDeviceId() {
+        base_tv_center_text.setText(PhoneKit.INSTANCE.getDeviceId(MainActivity.this));
     }
 }
