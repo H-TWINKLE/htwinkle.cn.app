@@ -1,0 +1,42 @@
+name: htwinkle.app - deploy
+
+on:
+  push:
+    branches: [ develop ]
+    
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+      - uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: current
+          arguments: assembleRelease
+      - name: sign_app
+        uses: r0adkll/sign-android-release@v1
+          id: sign_app
+          with:
+            releaseDirectory: app/build/outputs/apk/release
+            signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+            alias: ${{ secrets.ALIAS }}
+            keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+            keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Create GitHub release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ env.ReleaseVersion }}
+          title: ${{ env.ReleaseVersion }}
+          prerelease: false
+          files: |
+            app/build/outputs/apk/release/*
+        
+
