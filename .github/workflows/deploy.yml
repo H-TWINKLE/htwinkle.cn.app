@@ -2,8 +2,7 @@ name: htwinkle.app - deploy
 
 on:
   push:
-    tags:
-      - '*'
+    branches: [ develop ]
 
   workflow_dispatch:
 
