@@ -52,17 +52,10 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias rootProject.ext.KEY_ALIAS
-            keyPassword rootProject.ext.KEY_PASSWORD
-            storeFile file('../Sky.jks.base64.txt')
-            storePassword rootProject.ext.KEYSTORE_PASSWORD
-        }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
