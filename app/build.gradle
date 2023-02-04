@@ -55,7 +55,7 @@ android {
         release {
             keyAlias rootProject.ext.KEY_ALIAS
             keyPassword rootProject.ext.KEY_PASSWORD
-            storeFile file('E:/MyMajor/myandroid/Sky.jks')
+            storeFile file('../Sky.jks.base64.txt')
             storePassword rootProject.ext.KEYSTORE_PASSWORD
         }
     }
