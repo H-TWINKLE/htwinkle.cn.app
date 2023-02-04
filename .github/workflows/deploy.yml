@@ -3,9 +3,9 @@ name: htwinkle.app - deploy
 on:
   push:
     branches: [ develop ]
-    
+
   workflow_dispatch:
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,13 +22,13 @@ jobs:
           arguments: assembleRelease
       - name: sign_app
         uses: r0adkll/sign-android-release@v1
-          id: sign_app
-          with:
-            releaseDirectory: app/build/outputs/apk/release
-            signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-            alias: ${{ secrets.ALIAS }}
-            keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-            keyPassword: ${{ secrets.KEY_PASSWORD }}
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
       - name: Create GitHub release
         uses: marvinpinto/action-automatic-releases@latest
         with:
