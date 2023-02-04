@@ -44,7 +44,7 @@ jobs:
         with:
           tag: ${{ env.ReleaseVersion }}
           allowUpdates: true
-          artifacts: "*.apk"
+          artifacts: "app/build/outputs/apk/release/*.apk"
           token: ${{ github.token }}
           generateReleaseNotes: true
         
