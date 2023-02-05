@@ -25,7 +25,8 @@ public class AppInfoAdapter extends BaseQuickAdapter<AppInfo, BaseViewHolder> {
 
         // 设置显示信息
         if (!TextUtils.isEmpty(appInfo.getImgUrl())) {
-            x.image().bind(holder.getView(R.id.item_app_info_img_siv), appInfo.getImgUrl());
+            String imgUrl = appInfo.getImgUrl() + "&t=" + System.currentTimeMillis();
+            x.image().bind(holder.getView(R.id.item_app_info_img_siv), imgUrl);
         } else if (appInfo.getResourcesId() != 0) {
             holder.setImageResource(R.id.item_app_info_img_siv, appInfo.getResourcesId());
         } else {

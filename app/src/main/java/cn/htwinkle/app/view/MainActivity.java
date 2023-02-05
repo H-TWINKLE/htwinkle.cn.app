@@ -61,7 +61,6 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.base_dialog_edit, null);
         EditText sendNameEt = dialogView.findViewById(R.id.base_dialog_text_et);
         sendNameEt.setText(deviceId);
-        sendNameEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
         sendNameEt.setSelection(deviceId.length());
         sendNameEt.postDelayed(() -> {
             sendNameEt.requestFocus();
@@ -179,6 +178,7 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
             appInfo.setDescription(module.description());
             appInfo.settClass(item);
             appInfo.setPermission(module.permissions());
+            appInfo.setImgUrl(module.imgResourcesUrl());
             if (module.imgResourcesId() != 0) {
                 appInfo.setResourcesId(module.imgResourcesId());
             }

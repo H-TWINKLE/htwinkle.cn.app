@@ -85,7 +85,6 @@ public class SmsPersonAdapter extends BaseQuickAdapter<SmsPerson, BaseViewHolder
         View dialogView = LayoutInflater.from(activity).inflate(R.layout.base_dialog_edit, null);
         EditText sendNameEt = dialogView.findViewById(R.id.base_dialog_text_et);
         sendNameEt.setText(smsPerson.getSendName());
-        sendNameEt.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
         sendNameEt.setSelection(smsPerson.getSendName().length());
         sendNameEt.postDelayed(() -> {
             sendNameEt.requestFocus();
