@@ -47,11 +47,11 @@ import cn.hutool.http.HttpUtil;
 
 @AppModule(value = GroupSMSActivity.TITLE,
         description = "自定义称谓的群发信息",
-        imgResourcesId = R.drawable.welcome_default_pic,
+        defaultResourcesId = R.drawable.welcome_default_pic,
         imgResourcesUrl = HttpConstant.FENGJING_RANDOM_PIC,
         permissions = {Permission.SEND_SMS, Permission.RECEIVE_SMS, Permission.READ_SMS,
                 Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS,
-                Permission.READ_PHONE_STATE, Permission.MANAGE_EXTERNAL_STORAGE}
+                Permission.READ_PHONE_STATE}
 )
 @ContentView(R.layout.base_recycler_with_toolbar)
 public class GroupSMSActivity extends BaseRefreshActivity<SmsPerson, SmsPersonAdapter> {

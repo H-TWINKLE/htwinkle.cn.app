@@ -120,6 +120,19 @@ public enum PhoneKit {
         return parentDir;
     }
 
+    public static File getChildDir(String filePath) {
+        File parentDir =
+                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), Constants.APP_PACKAGE_NAME);
+        if (!parentDir.exists()) {
+            parentDir.mkdir();
+        }
+        File file = new File(parentDir, filePath);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        return file;
+    }
+
     public static File saveFileToSdCard(String fileName, File file) {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             File parent = getSdCardParentDir();

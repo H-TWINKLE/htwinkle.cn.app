@@ -44,7 +44,7 @@ android {
     defaultConfig {
         applicationId "cn.htwinkle.app"
         minSdk 24
-        targetSdk 31
+        targetSdk 28
         versionCode verCode
         versionName verName + "." + verCode
 
@@ -100,7 +100,7 @@ dependencies {
     implementation 'com.github.getActivity:XXPermissions:16.2'
 
     // https://mvnrepository.com/artifact/cn.hutool/hutool-all
-    implementation 'cn.hutool:hutool-all:5.8.11'
+    implementation 'cn.hutool:hutool-all:5.8.22'
 
-
+    implementation 'com.github.nanchen2251:ScreenRecordHelper:1.0.2'
 }
