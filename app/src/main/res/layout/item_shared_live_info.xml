@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/item_shared_live_index_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:maxLines="1"
+        android:minWidth="20dp"
+        android:text="#"
+        android:textAlignment="center"
+        android:textColor="#DA6363"
+        android:textSize="15sp"
+        tools:text="1" />
+
+    <include
+        layout="@layout/base_div_line"
+        android:layout_width="2dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="4dp" />
+
+    <TextView
+        android:id="@+id/item_shared_live_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:maxLines="1"
+        android:text="名字"
+        android:textAlignment="center"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        tools:text="真实名称" />
+
+    <TextView
+        android:id="@+id/item_sms_shared_live_device_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:maxLines="1"
+        android:text="发送名字"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        tools:text="魅族17pro" />
+
+</LinearLayout>

@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -179,8 +178,8 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
             appInfo.settClass(item);
             appInfo.setPermission(module.permissions());
             appInfo.setImgUrl(module.imgResourcesUrl());
-            if (module.imgResourcesId() != 0) {
-                appInfo.setResourcesId(module.imgResourcesId());
+            if (module.defaultResourcesId() != 0) {
+                appInfo.setResourcesId(module.defaultResourcesId());
             }
             if (!TextUtils.isEmpty(module.imgResourcesUrl())) {
                 appInfo.setImgUrl(module.imgResourcesUrl());
@@ -217,7 +216,7 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
 
     private void initDeviceId() {
         XXPermissions.with(this)
-                .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE)
                 .request(new OnPermissionCallback() {
                     @Override
                     public void onGranted(List<String> permissions, boolean all) {

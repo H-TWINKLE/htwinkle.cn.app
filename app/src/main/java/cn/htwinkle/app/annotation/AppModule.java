@@ -12,7 +12,7 @@ public @interface AppModule {
 
     String description() default "";
 
-    int imgResourcesId() default 0;
+    int defaultResourcesId() default 0;
 
     String imgResourcesUrl() default "";
 
