@@ -44,10 +44,10 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="true"
-        android:icon="@drawable/main_logo"
-        android:label="@string/global_app_name"
+        android:icon="${app_icon}"
+        android:label="${app_name}"
         android:requestLegacyExternalStorage="true"
-        android:roundIcon="@drawable/main_logo"
+        android:roundIcon="${app_icon}"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
@@ -61,7 +61,7 @@
             android:name=".view.WelActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
-            android:label="@string/global_app_name">
+            android:label="${app_name}">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

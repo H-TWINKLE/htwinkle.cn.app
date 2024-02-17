@@ -15,3 +15,5 @@
 local.properties
 /.idea/
 /app/release/
+/app/outputs/release/output-metadata.json
+/app/outputs/release/WeLife_V10.0.24_release.apk
