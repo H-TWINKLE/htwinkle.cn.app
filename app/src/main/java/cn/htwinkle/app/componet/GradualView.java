@@ -13,12 +13,16 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import cn.hutool.core.util.RandomUtil;
+
 public class GradualView extends View {
+
+    // 随机颜色变化
+    public static final int COLOR_TAG = RandomUtil.randomInt(10, 255);
 
     private int animatedValue;
     private int colorEnd;
     private int colorStart;
-    private int animatedValue1;
 
     public GradualView(Context context) {
         super(context);
@@ -60,7 +64,7 @@ public class GradualView extends View {
         animator.addUpdateListener(animation -> {
             animatedValue = (int) animation.getAnimatedValue();
             if (animatedValue < 255) {
-                colorStart = Color.rgb(255, animatedValue, 255 - animatedValue);
+                colorStart = Color.rgb(COLOR_TAG, animatedValue, 255 - animatedValue);
                 colorEnd = Color.rgb(animatedValue, 0, 255 - animatedValue);
             }
             invalidate();
@@ -77,14 +81,11 @@ public class GradualView extends View {
         int height = getHeight();
 
         Paint paint = new Paint();
-        LinearGradient backGradient =
-                new LinearGradient(width, 0, 0, 0,
-                        new int[]{colorStart, colorEnd},
-                        new float[]{0, 1f}, Shader.TileMode.CLAMP);
+        LinearGradient backGradient = new LinearGradient(width, 0, 0, 0,
+                new int[]{colorStart, colorEnd},
+                new float[]{0, 1f}, Shader.TileMode.CLAMP);
         paint.setShader(backGradient);
 
         canvas.drawRect(0, 0, width, height, paint);
     }
-
-
 }

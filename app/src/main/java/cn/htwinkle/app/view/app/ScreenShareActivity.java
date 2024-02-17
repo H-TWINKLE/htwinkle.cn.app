@@ -28,9 +28,7 @@ import cn.htwinkle.app.view.base.BaseRefreshActivity;
 @AppModule(value = ScreenShareActivity.TITLE,
         description = "手机屏幕分享工具",
         imgResourcesUrl = HttpConstant.FENGJING_RANDOM_PIC,
-        permissions = {Permission.SEND_SMS, Permission.RECEIVE_SMS, Permission.READ_SMS,
-                Permission.RECEIVE_WAP_PUSH, Permission.RECEIVE_MMS, Permission.READ_CONTACTS,
-                Permission.READ_PHONE_STATE}
+        permissions = {Permission.READ_PHONE_STATE}
 )
 @ContentView(R.layout.activity_screen_shared)
 public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLiveAdapter> {

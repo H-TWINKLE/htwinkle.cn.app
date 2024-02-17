@@ -11,8 +11,6 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -86,47 +84,13 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
             imm.showSoftInput(sendNameEt, InputMethodManager.SHOW_IMPLICIT);
         }, 100);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setTitle("请输入身份标志")
-                .setPositiveButton("确定", (dialogInterface, i) -> {
-                    runOnUiThread(() -> {
-                        Editable text = sendNameEt.getText();
-                        if (StrUtil.isEmpty(text.toString())) {
-                            setToastString("输入的身份标志为空");
-                            return;
-                        }
-                        base_tv_center_text.setText(text);
-                        SharedPrefsKit.INSTANCE.saveValue(this, Constants.GLOBAL_DEVICE_NAME, text.toString());
-                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
-                    });
-                    dialogInterface.cancel();
-                })
-                .setNeutralButton("复原", (dialogInterface, i) -> {
-                    runOnUiThread(() -> {
-                        SharedPrefsKit.INSTANCE.removeKey(this, Constants.GLOBAL_DEVICE_NAME);
-                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
-                        setDefaultDeviceId();
-                    });
-                    dialogInterface.cancel();
-                })
-                .setNegativeButton("取消", (dialogInterface, i) -> dialogInterface.cancel())
-                .create();
-
-        alertDialog.show();
+        idDialog(dialogView, sendNameEt);
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        handler.postDelayed(() -> {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }, 100);
+        handler.postDelayed(this::fullscreen, 100);
     }
 
     @Override
@@ -174,6 +138,37 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void idDialog(View dialogView, EditText sendNameEt) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setTitle("请输入身份标志")
+                .setPositiveButton("确定", (dialogInterface, i) -> {
+                    runOnUiThread(() -> {
+                        Editable text = sendNameEt.getText();
+                        if (StrUtil.isEmpty(text.toString())) {
+                            setToastString("输入的身份标志为空");
+                            return;
+                        }
+                        base_tv_center_text.setText(text);
+                        SharedPrefsKit.INSTANCE.saveValue(this, Constants.GLOBAL_DEVICE_NAME, text.toString());
+                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
+                    });
+                    dialogInterface.cancel();
+                })
+                .setNeutralButton("复原", (dialogInterface, i) -> {
+                    runOnUiThread(() -> {
+                        SharedPrefsKit.INSTANCE.removeKey(this, Constants.GLOBAL_DEVICE_NAME);
+                        CommKit.safety(() -> DbKit.INSTANCE.getDb().close());
+                        setDefaultDeviceId();
+                    });
+                    dialogInterface.cancel();
+                })
+                .setNegativeButton("取消", (dialogInterface, i) -> dialogInterface.cancel())
+                .create();
+
+        alertDialog.show();
     }
 
     private void backToHome() {
