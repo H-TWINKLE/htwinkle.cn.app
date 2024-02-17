@@ -21,28 +21,47 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.alibaba.fastjson.JSONObject;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
+import com.vector.update_app.UpdateAppBean;
+import com.vector.update_app.UpdateAppManager;
+import com.vector.update_app.UpdateCallback;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
+import org.xutils.x;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import cn.htwinkle.app.BuildConfig;
 import cn.htwinkle.app.R;
 import cn.htwinkle.app.adapter.AppInfoAdapter;
 import cn.htwinkle.app.annotation.AppModule;
 import cn.htwinkle.app.constants.Constants;
+import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.AppInfo;
+import cn.htwinkle.app.entity.ReleaseLatest;
 import cn.htwinkle.app.kit.ClassesReader;
 import cn.htwinkle.app.kit.CommKit;
 import cn.htwinkle.app.kit.DbKit;
 import cn.htwinkle.app.kit.PhoneKit;
 import cn.htwinkle.app.kit.SharedPrefsKit;
+import cn.htwinkle.app.kit.VersionUpdateKit;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
+import cn.htwinkle.app.wrapper.UpdateAppHttpUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.unit.DataSizeUtil;
+import cn.hutool.core.lang.Pair;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 
 @ContentView(R.layout.activity_main)
@@ -139,6 +158,8 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
 
     @Override
     public void getData() {
+        x.task().run(this::checkUpdate);
+
         List<Class<?>> list = ClassesReader.reader(Constants.APP_LIST_PACKAGE, this);
         onSuccessGetData(list
                 .stream()
@@ -230,7 +251,84 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
                 });
     }
 
+    private void checkUpdate() {
+        Pair<ReleaseLatest, ReleaseLatest.AssetsDTO> info = getLatestApk();
+        if (info == null) {
+            return;
+        }
+
+        ReleaseLatest.AssetsDTO latestApk = info.getValue();
+        if (latestApk == null || StrUtil.isEmpty(latestApk.getName())) {
+            return;
+        }
+        String[] name = latestApk.getName().split("_");
+
+        Optional<String> versionName = Arrays.stream(name).filter(item -> item.toUpperCase(Locale.ROOT).startsWith("V")).findFirst();
+        if (!versionName.isPresent()) {
+            return;
+        }
+        String versionStr = versionName.get();
+        String latestVersion = versionStr.replaceAll("[V.]", "");
+        Double latestVersionD = Convert.toDouble(latestVersion);
+
+        String thisVersion = BuildConfig.VERSION_NAME.replaceAll("[V.]", "");
+        Double thisVersionD = Convert.toDouble(thisVersion);
+
+        // boolean update = true;
+
+        boolean update = latestVersionD > thisVersionD;
+
+        // 远程版本低于现在版本
+        if (!update) {
+            return;
+        }
+
+        UpdateAppManager build = new UpdateAppManager
+                .Builder()
+                //当前Activity
+                .setActivity(this)
+                //更新地址
+                .setUpdateUrl(latestApk.getBrowserDownloadUrl())
+                //实现httpManager接口的对象
+                .setHttpManager(new UpdateAppHttpUtil())
+                .build();
+
+        build.checkNewApp(new UpdateCallback() {
+            @Override
+            protected UpdateAppBean parseJson(String json) {
+                UpdateAppBean appBean = new UpdateAppBean();
+
+                appBean.setUpdate(StrUtil.upperFirst(BooleanUtil.toStringYesNo(update)))
+                        .setOriginRes(JSONObject.toJSONString(info))
+                        .setNewVersion(StrUtil.format(" {} ", versionStr))
+                        .setApkFileUrl(latestApk.getBrowserDownloadUrl())
+                        .setTargetSize(DataSizeUtil.format(latestApk.getSize()))
+                        .setUpdateLog(StrUtil.format("更新时间：{} \n {}", DateUtil.parse(info.getKey().getPublishedAt()), info.getKey().getBody()))
+                        .setConstraint(false);
+                return appBean;
+            }
+        });
+    }
+
     private void setDefaultDeviceId() {
         base_tv_center_text.setText(PhoneKit.INSTANCE.getDeviceId(MainActivity.this));
+    }
+
+    private Pair<ReleaseLatest, ReleaseLatest.AssetsDTO> getLatestApk() {
+        ReleaseLatest releaseLatest = VersionUpdateKit.INSTANCE.getGithubAssertsList(HttpConstant.GIT_HUB_RELEASE_LATEST);
+        if (releaseLatest == null) {
+            return null;
+        }
+
+        List<ReleaseLatest.AssetsDTO> assertsList = releaseLatest.getAssets();
+        if (CollUtil.isEmpty(assertsList)) {
+            return null;
+        }
+
+        Optional<ReleaseLatest.AssetsDTO> signed = assertsList.stream()
+                .filter(item -> StrUtil.isNotEmpty(item.getName()))
+                .filter(item -> item.getName().contains("signed"))
+                .findFirst();
+        return new Pair<>(releaseLatest, signed.orElse(null));
     }
 }

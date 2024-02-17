@@ -52,6 +52,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:theme">
+        <service
+            android:name=".service.CoreService"
+            android:exported="false"></service>
 
         <meta-data
             android:name="ScopedStorage"
@@ -68,27 +71,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".view.MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".view.app.GroupSMSActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".view.app.PreviewSMSActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".view.app.ScreenShareActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
-
     </application>
 
 </manifest>

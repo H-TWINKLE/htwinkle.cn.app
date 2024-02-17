@@ -1,6 +1,9 @@
 package cn.htwinkle.app.constants;
 
 public interface HttpConstant {
+
+    String GIT_HUB_RELEASE_LATEST = "https://api.github.com/repos/H-TWINKLE/htwinkle.cn.app/releases/latest";
+
     String HTTP_HTWINKLE_CN = "http://htwinkle.cn";
     String SMS_DELETE_BY = HTTP_HTWINKLE_CN + "/sms/deleteBy";
     String SMS_SAVE_OR_UPDATE = HTTP_HTWINKLE_CN + "/sms/saveOrUpdate";
