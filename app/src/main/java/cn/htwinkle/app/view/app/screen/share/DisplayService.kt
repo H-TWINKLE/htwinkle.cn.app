@@ -134,7 +134,15 @@ class DisplayService : Service() {
     fun startStreamRtp(endpoint: String) {
         if (!genericDisplay.isStreaming) {
             //genericDisplay.prepareVideo(width, height, 60, width * height, 0, dpi)
-            if (genericDisplay.prepareVideo(width, height, 60, width * height, 0, dpi)) {
+            if (genericDisplay.prepareVideo(
+                    width / 2,
+                    height / 2,
+                    30,
+                    (width * height) / 2,
+                    0,
+                    dpi
+                )
+            ) {
                 genericDisplay.startStream(endpoint)
             }
         } else {
