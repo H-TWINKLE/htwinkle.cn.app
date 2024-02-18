@@ -133,7 +133,13 @@ dependencies {
     // 屏幕录制
     // implementation 'com.github.nanchen2251:ScreenRecordHelper:1.0.2'
     implementation 'com.github.pedroSG94.RootEncoder:library:2.3.5'
-    implementation 'com.github.pedroSG94.vlc-example-streamplayer:pedrovlc:2.5.14v3'
+    //implementation 'com.github.pedroSG94.vlc-example-streamplayer:pedrovlc:2.5.14v3'
+    //implementation 'com.github.tcking:giraffeplayer2:0.1.25'
+
+    //implementation 'com.github.tcking:ijkplayer-arm64:0.8.8'
+    //implementation 'com.github.tcking:ijkplayer-x86_64:0.8.8' //support x86_64
+
+    implementation 'io.github.justson:agentweb-core:v5.1.1-androidx'
 
     // android 自动更新
     implementation 'com.qianwen:update-app:3.5.2'
