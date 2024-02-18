@@ -55,7 +55,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:replace="android:theme">
+        tools:replace="android:label">
 
         <meta-data
             android:name="ScopedStorage"
@@ -85,8 +85,14 @@
             android:name=".view.app.PreviewSMSActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".view.app.ScreenShareActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".view.app.screen.share.ShareViewActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
 

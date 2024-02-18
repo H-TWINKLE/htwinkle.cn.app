@@ -1,5 +1,7 @@
 package cn.htwinkle.app.constants;
 
+import android.os.Build;
+
 import cn.htwinkle.app.BuildConfig;
 
 public interface Constants {
@@ -11,6 +13,11 @@ public interface Constants {
 
     long CACHE_MAX_TIME = 365L * 24 * 60 * 60 * 1000;
 
+    /**
+     * 手机的品牌
+     */
+    String MOBILE_DEVICE_BRAND = Build.MODEL;
+
     String APP_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
     String APP_LIST_PACKAGE = APP_PACKAGE_NAME.replace(".debug", "") + ".view.app";
@@ -21,4 +28,6 @@ public interface Constants {
     String SHARE_PREFERENCES_KEY = "HtwinkleCnAppData";
 
     String GLOBAL_DEVICE_NAME = "GLOBAL_DEVICE_NAME";
+
+    String SHARE_VIEW = "SHARE_VIEW";
 }

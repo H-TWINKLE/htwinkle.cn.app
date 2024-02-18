@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/base_item_click_bg"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <TextView
         android:id="@+id/item_shared_live_index_tv"
@@ -24,24 +29,46 @@
         android:layout_marginTop="6dp"
         android:layout_marginEnd="4dp" />
 
-    <TextView
-        android:id="@+id/item_shared_live_name_tv"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:maxLines="1"
-        android:text="名字"
-        android:textAlignment="center"
-        android:textSize="17sp"
-        android:textStyle="bold"
-        tools:text="真实名称" />
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/item_shared_live_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:maxLines="1"
+            android:text="名字"
+            android:textAlignment="center"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            tools:text="真实名称" />
+
+        <TextView
+            android:id="@+id/item_shared_live_device_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:maxLines="1"
+            android:text="名字"
+            android:textAlignment="center"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            tools:text="真实名称" />
+
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/item_sms_shared_live_device_name_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
-        android:maxLines="1"
+        android:maxLines="3"
         android:text="发送名字"
         android:textAlignment="center"
         android:textColor="@color/black"

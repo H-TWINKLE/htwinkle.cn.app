@@ -52,8 +52,7 @@ class DisplayService : Service() {
                 NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_HIGH)
             notificationManager?.createNotificationChannel(channel)
         }
-        genericDisplay = GenericDisplay(baseContext, true, connectChecker)
-        genericDisplay.glInterface?.setForceRender(true)
+
         INSTANCE = this
     }
 
@@ -90,12 +89,17 @@ class DisplayService : Service() {
         var height = 0
         var dpi = 0
 
-        lateinit var connectChecker: ConnectChecker
+        var connectChecker: ConnectChecker? = null
         var INSTANCE: DisplayService? = null
     }
 
     private var notificationManager: NotificationManager? = null
     private lateinit var genericDisplay: GenericDisplay
+
+    fun onInit(){
+        genericDisplay = GenericDisplay(baseContext, true, connectChecker!!)
+        genericDisplay.glInterface?.setForceRender(true)
+    }
 
     fun setVideoCodec(codec: VideoCodec) {
         genericDisplay.setVideoCodec(codec)

@@ -12,4 +12,6 @@ public interface HttpConstant {
     String FENGJING_RANDOM_PIC = HTTP_HTWINKLE_CN + "/picture/randomImg?plate=2&type=fengjing";
 
     String SRS_MAIN = "http://htwinkle.cn:8080/";
+
+    String ONLINE_STREAM_LIST = "http://htwinkle.cn:1985/api/v1/streams/";
 }

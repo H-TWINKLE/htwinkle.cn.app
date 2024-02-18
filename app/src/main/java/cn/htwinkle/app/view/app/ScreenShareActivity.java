@@ -9,13 +9,13 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.alibaba.fastjson.JSONObject;
 import com.hjq.permissions.Permission;
 import com.pedro.common.ConnectChecker;
 import com.pedro.common.VideoCodec;
@@ -23,19 +23,26 @@ import com.pedro.common.VideoCodec;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
+import org.xutils.x;
 
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.htwinkle.app.R;
-import cn.htwinkle.app.adapter.SharedLiveAdapter;
+import cn.htwinkle.app.adapter.OnlineStreamAdapter;
 import cn.htwinkle.app.annotation.AppModule;
+import cn.htwinkle.app.constants.Constants;
 import cn.htwinkle.app.constants.HttpConstant;
-import cn.htwinkle.app.entity.ShareLive;
+import cn.htwinkle.app.entity.OnlineStream;
 import cn.htwinkle.app.view.app.screen.share.DisplayService;
+import cn.htwinkle.app.view.app.screen.share.ShareViewActivity;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
-import cn.htwinkle.app.wrapper.WebClientWrapper;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 
 @AppModule(value = ScreenShareActivity.TITLE,
         description = "轻量屏幕分享",
@@ -43,7 +50,7 @@ import cn.hutool.core.util.StrUtil;
         permissions = {Permission.RECORD_AUDIO}
 )
 @ContentView(R.layout.activity_screen_shared)
-public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLiveAdapter> implements ConnectChecker {
+public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.StreamsDTO, OnlineStreamAdapter> implements ConnectChecker {
 
     public static final String TITLE = "屏幕分享";
 
@@ -53,9 +60,6 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
     private final AtomicBoolean enabled = new AtomicBoolean(false);
 
     private final int REQUEST_CODE_STREAM = 179;
-
-    @ViewInject(R.id.screen_shared_wb)
-    private WebView screen_shared_wb;
 
     @ViewInject(R.id.screen_shared_btn)
     private Button screen_shared_btn;
@@ -74,7 +78,8 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
         super.onCreate(savedInstanceState);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        ENDPOINT = StrUtil.format("rtmp://htwinkle.cn:1935/live/{}", RandomUtil.randomString(20));
+        ENDPOINT = StrUtil.format("rtmp://htwinkle.cn:1935/live/{}_{}", Constants.MOBILE_DEVICE_BRAND, RandomUtil.randomString(20));
+
         startService();
     }
 
@@ -95,14 +100,33 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
     @Override
     public void initData() {
         setToolBarTitle(TITLE);
-        adapter = new SharedLiveAdapter(R.layout.item_shared_live_info);
+        adapter = new OnlineStreamAdapter(R.layout.item_shared_live_info, this);
+        adapter.setOnItemClickListener((adapter, view, position) -> {
+            Intent intent = new Intent(this, ShareViewActivity.class);
+            intent.putExtra(Constants.SHARE_VIEW, this.adapter.getData().get(position));
+            startActivity(intent);
+        });
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
         getData();
     }
 
     @Override
     public void getData() {
-        initWebView();
+        x.task().run(() -> {
+            String auth = HttpUtil.buildBasicAuth("admin", "13038132020", CharsetUtil.CHARSET_UTF_8);
+            String response = HttpRequest.get(HttpConstant.ONLINE_STREAM_LIST).auth(auth).execute().body();
+            Log.i(TAG, "onFinish: 获取推流信息列表成功");
+            if (StrUtil.isEmpty(response)) {
+                runOnUiThread(() -> onSuccessGetData(Collections.emptyList()));
+                return;
+            }
+            OnlineStream object = JSONObject.parseObject(response, OnlineStream.class);
+            if (object.getCode() == 0 && CollUtil.isNotEmpty(object.getStreams())) {
+                runOnUiThread(() -> onSuccessGetData(object.getStreams()));
+                return;
+            }
+            runOnUiThread(() -> onSuccessGetData(Collections.emptyList()));
+        });
     }
 
     @Override
@@ -134,7 +158,7 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
     public void onConnectionFailed(@NonNull String s) {
         runOnUiThread(() -> Toast.makeText(this, "连接失败：" + s, Toast.LENGTH_SHORT).show());
         Log.e(TAG, "RTP service connection failed: " + s);
-        stopRecord();
+        runOnUiThread(this::stopRecord);
     }
 
     @Override
@@ -171,6 +195,7 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
     private void startRecord() {
         DisplayService displayService = DisplayService.COMPANION.getINSTANCE();
         if (displayService != null) {
+            displayService.onInit();
             displayService.setVideoCodec(VideoCodec.H264);
             startActivityForResult(displayService.sendIntent(), REQUEST_CODE_STREAM);
         }
@@ -231,24 +256,5 @@ public class ScreenShareActivity extends BaseRefreshActivity<ShareLive, SharedLi
         int densityDpi = displayMetrics.densityDpi;
 
         DisplayService.COMPANION.setDpi(densityDpi);
-    }
-
-    /**
-     * 初始化浏览器
-     */
-    private void initWebView() {
-        screen_shared_wb.getSettings().setJavaScriptEnabled(true);
-        screen_shared_wb.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-        screen_shared_wb.getSettings().setDomStorageEnabled(true);
-        screen_shared_wb.getSettings().setDatabaseEnabled(true);
-        screen_shared_wb.setWebViewClient(new WebClientWrapper(this));
-        loadHomeUrl();
-    }
-
-    /**
-     * 回到主页
-     */
-    private void loadHomeUrl() {
-        screen_shared_wb.loadUrl(HttpConstant.SRS_MAIN);
     }
 }
