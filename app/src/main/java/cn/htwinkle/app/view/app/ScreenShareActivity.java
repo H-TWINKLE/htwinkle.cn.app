@@ -3,6 +3,7 @@ package cn.htwinkle.app.view.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -64,6 +65,9 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
     @ViewInject(R.id.screen_shared_btn)
     private Button screen_shared_btn;
 
+    @ViewInject(R.id.screen_shared_to_home_btn)
+    private Button screen_shared_to_home_btn;
+
     @Event(R.id.screen_shared_btn)
     private void onBtnClick(View view) {
         if (!enabled.get()) {
@@ -71,6 +75,20 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         } else {
             stopRecord();
         }
+    }
+
+    @Event(R.id.screen_shared_to_home_btn)
+    private void onHomeBtnClick(View view) {
+        backToHome();
+    }
+
+    @Event(R.id.screen_shared_brow_iv)
+    private void onBrowserClick(View view) {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        Uri content_url = Uri.parse("http://htwinkle.cn:8080/console/en_index.html#/streams");
+        intent.setData(content_url);
+        startActivity(intent);
     }
 
     @Override
@@ -201,6 +219,7 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         }
         enabled.set(true);
         screen_shared_btn.setText("停止分享");
+        screen_shared_to_home_btn.setVisibility(View.VISIBLE);
     }
 
     private void stopRecord() {
@@ -214,6 +233,7 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
     private void setStartShare() {
         enabled.set(false);
         screen_shared_btn.setText("开始分享");
+        screen_shared_to_home_btn.setVisibility(View.GONE);
     }
 
     private void startService() {
@@ -256,5 +276,12 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         int densityDpi = displayMetrics.densityDpi;
 
         DisplayService.COMPANION.setDpi(densityDpi);
+    }
+
+    private void backToHome() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        startActivity(intent);
     }
 }
