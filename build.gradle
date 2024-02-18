@@ -1,5 +1,8 @@
 apply from: "config.gradle"
+
 buildscript {
+    ext.kotlin_version= '1.9.0'
+
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public' }
         google()
@@ -7,7 +10,9 @@ buildscript {
         maven { url "https://www.jitpack.io" }
     }
     dependencies {
+
         classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
