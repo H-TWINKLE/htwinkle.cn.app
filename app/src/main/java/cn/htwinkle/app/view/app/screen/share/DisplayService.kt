@@ -27,6 +27,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import cn.htwinkle.app.R
+import cn.htwinkle.app.constants.Constants
 import com.pedro.common.ConnectChecker
 import com.pedro.common.VideoCodec
 import com.pedro.library.generic.GenericDisplay
@@ -88,6 +89,7 @@ class DisplayService : Service() {
         var width = 0
         var height = 0
         var dpi = 0
+        var quil = Constants.DEFAULT_QUIL
 
         var connectChecker: ConnectChecker? = null
         var INSTANCE: DisplayService? = null
@@ -96,7 +98,7 @@ class DisplayService : Service() {
     private var notificationManager: NotificationManager? = null
     private lateinit var genericDisplay: GenericDisplay
 
-    fun onInit(){
+    fun onInit() {
         genericDisplay = GenericDisplay(baseContext, true, connectChecker!!)
         genericDisplay.glInterface?.setForceRender(true)
     }
@@ -137,16 +139,18 @@ class DisplayService : Service() {
 
     fun startStreamRtp(endpoint: String) {
         if (!genericDisplay.isStreaming) {
-            //genericDisplay.prepareVideo(width, height, 60, width * height, 0, dpi)
-            if (genericDisplay.prepareVideo(
-                    width / 2,
-                    height / 2,
-                    30,
-                    (width * height) / 2,
-                    0,
-                    dpi
-                )
-            ) {
+            val width = (width * quil * 0.01).toInt()
+            val height = (height * quil * 0.01).toInt()
+
+            val realWidth = if(width > 640)  width else 640;
+            val realHeight = if(height > 480)  height else 480;
+
+            val bit = (width * height * quil * 0.01).toInt()
+            val realBit = if(bit > 640 * 480)  bit else 640 * 480;
+
+
+            Log.i(TAG, "startStreamRtp: width: $width, width: $realWidth , height: $height, height: $realHeight , bit: $bit, bit: $realBit")
+            if (genericDisplay.prepareVideo(realWidth, realHeight, 30, realBit, 0, dpi)) {
                 genericDisplay.startStream(endpoint)
             }
         } else {

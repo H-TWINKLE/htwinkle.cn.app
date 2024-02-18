@@ -1,16 +1,21 @@
 package cn.htwinkle.app.view.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,6 +40,7 @@ import cn.htwinkle.app.annotation.AppModule;
 import cn.htwinkle.app.constants.Constants;
 import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.OnlineStream;
+import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.app.screen.share.DisplayService;
 import cn.htwinkle.app.view.app.screen.share.ShareViewActivity;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
@@ -67,6 +73,11 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
 
     @ViewInject(R.id.screen_shared_to_home_btn)
     private Button screen_shared_to_home_btn;
+
+    @Event(R.id.screen_shared_quil_iv)
+    private void onQuilClick(View view) {
+        showDialog();
+    }
 
     @Event(R.id.screen_shared_btn)
     private void onBtnClick(View view) {
@@ -240,6 +251,7 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         DisplayService displayService = DisplayService.COMPANION.getINSTANCE();
         if (displayService == null) {
             DisplayService.COMPANION.setConnectChecker(this);
+            DisplayService.COMPANION.setQuil(getQuil());
             startService(new Intent(this, DisplayService.class));
             setDeviceProp();
         }
@@ -283,5 +295,67 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
         startActivity(intent);
+    }
+
+    private void showDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.child_view_source, null);
+
+        TextView quil = view.findViewById(R.id.share_view_source_tv);
+        setQuilText(quil, getQuil());
+
+        SeekBar seekBar = view.findViewById(R.id.share_view_source_sb);
+        seekBar.setProgress(getQuil());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            seekBar.setMin(0);
+        }
+        seekBar.setMax(100);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // 进度变化时的回调
+                // 停止拖动时的回调
+
+                SharedPrefsKit.INSTANCE.saveValue(ScreenShareActivity.this, Constants.VIEW_QUIL, progress);
+                DisplayService.COMPANION.setQuil(progress);
+                setQuilText(quil, progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // 开始拖动时的回调
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        //4.设置参数
+        new AlertDialog.Builder(this)
+                .setTitle("滑动调整图像质量")
+                .setIcon(R.drawable.main_logo)
+                .setView(view)
+                .setPositiveButton("确认", (dialogInterface, i) -> {
+
+                })
+                .show();
+
+    }
+
+    private void setQuilText(TextView quil, int progress) {
+        int width = (int) (DisplayService.COMPANION.getWidth() * progress * 0.01);
+        int height = (int) (DisplayService.COMPANION.getHeight() * progress * 0.01);
+
+        int realWidth = Math.max(width, 640);
+        int realHeight = Math.max(height, 480);
+
+        int bit = (int) (width * height * progress * 0.01);
+        int realBit = Math.max(bit, 640 * 480);
+
+        String formatted = StrUtil.format("质量:{}，宽:{}，高:{}，dpi:{}", progress, realWidth, realHeight, realBit);
+        quil.setText(formatted);
+    }
+
+    private int getQuil() {
+        return SharedPrefsKit.INSTANCE.getInt(ScreenShareActivity.this, Constants.VIEW_QUIL, Constants.DEFAULT_QUIL);
     }
 }

@@ -30,4 +30,8 @@ public interface Constants {
     String GLOBAL_DEVICE_NAME = "GLOBAL_DEVICE_NAME";
 
     String SHARE_VIEW = "SHARE_VIEW";
+
+    String VIEW_QUIL = "VIEW_QUIL";
+
+    int DEFAULT_QUIL = 50;
 }

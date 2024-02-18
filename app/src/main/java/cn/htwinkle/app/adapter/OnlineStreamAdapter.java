@@ -29,7 +29,7 @@ public class OnlineStreamAdapter extends BaseQuickAdapter<OnlineStream.StreamsDT
         String name = streamsDTO.getName();
         if (StrUtil.isNotEmpty(name)) {
             String[] split = name.split("_");
-            holder.setText(R.id.item_shared_live_index_tv, String.valueOf(getItemCount()));
+            holder.setText(R.id.item_shared_live_index_tv, String.valueOf(getItemPosition(streamsDTO) + 1));
             holder.setText(R.id.item_shared_live_name_tv, split[0]);
             holder.setText(R.id.item_shared_live_device_tv, split.length > 1 ? split[1] : "");
             holder.setText(R.id.item_sms_shared_live_device_name_tv, DateTime.of(streamsDTO.getLiveMs()).toString(DatePattern.NORM_DATETIME_PATTERN));
