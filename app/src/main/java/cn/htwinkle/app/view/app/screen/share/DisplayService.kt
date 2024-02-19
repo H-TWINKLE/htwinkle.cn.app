@@ -54,6 +54,8 @@ class DisplayService : Service() {
             notificationManager?.createNotificationChannel(channel)
         }
 
+        onInit()
+
         INSTANCE = this
     }
 
@@ -142,14 +144,17 @@ class DisplayService : Service() {
             val width = (width * quil * 0.01).toInt()
             val height = (height * quil * 0.01).toInt()
 
-            val realWidth = if(width > 640)  width else 640;
-            val realHeight = if(height > 480)  height else 480;
+            val realWidth = if (width > 640) width else 640;
+            val realHeight = if (height > 480) height else 480;
 
             val bit = (width * height * quil * 0.01).toInt()
-            val realBit = if(bit > 640 * 480)  bit else 640 * 480;
+            val realBit = if (bit > 640 * 480) bit else 640 * 480;
 
 
-            Log.i(TAG, "startStreamRtp: width: $width, width: $realWidth , height: $height, height: $realHeight , bit: $bit, bit: $realBit")
+            Log.i(
+                TAG,
+                "startStreamRtp: width: $width, width: $realWidth , height: $height, height: $realHeight , bit: $bit, bit: $realBit"
+            )
             if (genericDisplay.prepareVideo(realWidth, realHeight, 30, realBit, 0, dpi)) {
                 genericDisplay.startStream(endpoint)
             }

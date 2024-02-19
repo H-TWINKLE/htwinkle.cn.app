@@ -56,6 +56,7 @@ import cn.htwinkle.app.view.base.BaseRefreshActivity;
 import cn.htwinkle.app.wrapper.UpdateAppHttpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.Pair;
@@ -298,7 +299,8 @@ public class MainActivity extends BaseRefreshActivity<AppInfo, AppInfoAdapter> {
                         .setNewVersion(StrUtil.format(" {} ", versionStr))
                         .setApkFileUrl(latestApk.getBrowserDownloadUrl())
                         .setTargetSize(DataSizeUtil.format(latestApk.getSize()))
-                        .setUpdateLog(StrUtil.format("更新时间：{} \n {}", DateUtil.parse(info.getKey().getPublishedAt()), info.getKey().getBody()))
+                        .setUpdateLog(StrUtil.format("更新时间：{} \n {}",
+                                DateUtil.parse(info.getKey().getPublishedAt(), DatePattern.UTC_PATTERN), info.getKey().getBody()))
                         .setConstraint(false);
                 return appBean;
             }

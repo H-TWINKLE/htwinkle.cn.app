@@ -42,7 +42,6 @@ import cn.htwinkle.app.constants.HttpConstant;
 import cn.htwinkle.app.entity.OnlineStream;
 import cn.htwinkle.app.kit.SharedPrefsKit;
 import cn.htwinkle.app.view.app.screen.share.DisplayService;
-import cn.htwinkle.app.view.app.screen.share.ShareViewActivity;
 import cn.htwinkle.app.view.base.BaseRefreshActivity;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -95,10 +94,10 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
 
     @Event(R.id.screen_shared_brow_iv)
     private void onBrowserClick(View view) {
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.VIEW");
-        Uri content_url = Uri.parse("http://htwinkle.cn:8080/console/en_index.html#/streams");
-        intent.setData(content_url);
+        Intent intent = new Intent(this, CommWebViewActivity.class);
+        intent.putExtra(Constants.WEB_VIEW_TITLE, "SRS管理端");
+        intent.putExtra(Constants.WEB_VIEW_HOME, "http://htwinkle.cn:8080/");
+        intent.putExtra(Constants.WEB_VIEW_SRS_AUTH, "admin:13038132020");
         startActivity(intent);
     }
 
@@ -131,8 +130,16 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
         setToolBarTitle(TITLE);
         adapter = new OnlineStreamAdapter(R.layout.item_shared_live_info, this);
         adapter.setOnItemClickListener((adapter, view, position) -> {
-            Intent intent = new Intent(this, ShareViewActivity.class);
-            intent.putExtra(Constants.SHARE_VIEW, this.adapter.getData().get(position));
+            OnlineStream.StreamsDTO shareView = this.adapter.getData().get(position);
+
+            String formatted = StrUtil.format("http://htwinkle.cn:8080/players/srs_player.html?vhost=__defaultVhost__&app={}&stream={}.flv&server=htwinkle.cn&port=8080&autostart=true&schema=http",
+                    shareView.getApp(),
+                    shareView.getName());
+
+            Intent intent = new Intent(this, CommWebViewActivity.class);
+            intent.putExtra(Constants.WEB_VIEW_TITLE, shareView.getName());
+            intent.putExtra(Constants.WEB_VIEW_HOME, formatted);
+            intent.putExtra(Constants.WEB_VIEW_SRS_AUTH, "admin:13038132020");
             startActivity(intent);
         });
         loadAnim(R.anim.anim_slide_in_bottom, R.anim.no_anim);
@@ -185,8 +192,8 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
 
     @Override
     public void onConnectionFailed(@NonNull String s) {
-        runOnUiThread(() -> Toast.makeText(this, "连接失败：" + s, Toast.LENGTH_SHORT).show());
         Log.e(TAG, "RTP service connection failed: " + s);
+        runOnUiThread(() -> Toast.makeText(this, "连接失败：" + s, Toast.LENGTH_SHORT).show());
         runOnUiThread(this::stopRecord);
     }
 
@@ -221,10 +228,17 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
 
     }
 
+    private void openOutBrowser() {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        Uri content_url = Uri.parse("http://htwinkle.cn:8080/console/en_index.html#/streams");
+        intent.setData(content_url);
+        startActivity(intent);
+    }
+
     private void startRecord() {
         DisplayService displayService = DisplayService.COMPANION.getINSTANCE();
         if (displayService != null) {
-            displayService.onInit();
             displayService.setVideoCodec(VideoCodec.H264);
             startActivityForResult(displayService.sendIntent(), REQUEST_CODE_STREAM);
         }
@@ -234,11 +248,11 @@ public class ScreenShareActivity extends BaseRefreshActivity<OnlineStream.Stream
     }
 
     private void stopRecord() {
+        setStartShare();
         DisplayService displayService = DisplayService.COMPANION.getINSTANCE();
         if (displayService != null) {
             displayService.stopStream();
         }
-        setStartShare();
     }
 
     private void setStartShare() {

@@ -92,7 +92,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".view.app.screen.share.ShareViewActivity"
+            android:name=".view.app.CommWebViewActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme.NoActionBar" />
 
