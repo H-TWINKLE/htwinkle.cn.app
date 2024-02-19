@@ -37,5 +37,5 @@ public interface Constants {
     String WEB_VIEW_HOME = "WEB_VIEW_HOME";
     String WEB_VIEW_SRS_AUTH = "WEB_VIEW_SRS_AUTH";
 
-    int DEFAULT_QUIL = 50;
+    int DEFAULT_QUIL = 75;
 }
